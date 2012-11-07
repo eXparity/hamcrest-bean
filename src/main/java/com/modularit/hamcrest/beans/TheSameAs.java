@@ -1,11 +1,10 @@
 
 package com.modularit.hamcrest.beans;
 
+import static java.lang.Character.isUpperCase;
 import static java.lang.reflect.Modifier.isStatic;
-import static org.hamcrest.Matchers.comparesEqualTo;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.apache.commons.lang.StringUtils.equalsIgnoreCase;
+import static org.apache.commons.lang.StringUtils.substringAfterLast;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -14,18 +13,19 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 
 /**
@@ -40,6 +40,17 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
  */
 public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
+	/**
+	 * Interface to be implemented by classes which can compare two property values to confirm if they're equivalent
+	 */
+	public interface PropertyComparator {
+
+		/**
+		 * Return <code>true</code> if both objects are equal
+		 */
+		public boolean isEquals(final Object lhs, final Object rhs);
+	}
+
 	@SuppressWarnings("rawtypes")
 	private static Comparator DEFAULT_COMPARATOR = new Comparator() {
 
@@ -52,10 +63,29 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 			"get", "is", "has"
 	};
 
+	private final Map<String, PropertyComparator> paths = new HashMap<String, PropertyComparator>();
+	private final Map<String, PropertyComparator> properties = new HashMap<String, PropertyComparator>();
+	private final Map<Class<?>, PropertyComparator> types = new HashMap<Class<?>, PropertyComparator>();
+
 	private final T object;
 
 	public TheSameAs(final T object) {
 		this.object = object;
+	}
+
+	public TheSameAs<T> withPathComparator(final String path, final PropertyComparator comparator) {
+		this.paths.put(path, comparator);
+		return this;
+	}
+
+	public TheSameAs<T> withPropertyComparator(final String path, final PropertyComparator comparator) {
+		this.properties.put(path, comparator);
+		return this;
+	}
+
+	public TheSameAs<T> withTypeComparator(final Class<?> type, final PropertyComparator comparator) {
+		this.types.put(type, comparator);
+		return this;
 	}
 
 	@Override
@@ -70,18 +100,16 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private void compareObjects(final Object expected, final Object actual, final String prefix, final MismatchContext ctx) {
+	private void compareObjects(final Object expected, final Object actual, final String path, final MismatchContext ctx) {
 
 		if (expected == null) {
-			Matcher<Object> m = nullValue();
-			if (!m.matches(actual)) {
-				ctx.addMismatch(expected, actual, prefix);
+			if (actual != null) {
+				ctx.addMismatch(expected, actual, path);
 			}
 			return;
 		} else {
-			Matcher<Object> m = notNullValue();
-			if (!m.matches(actual)) {
-				ctx.addMismatch(expected, actual, prefix);
+			if (actual == null) {
+				ctx.addMismatch(expected, actual, path);
 				return;
 			}
 		}
@@ -92,26 +120,50 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 			ctx.addComparedPair(expected, actual);
 		}
 
+		String pathNoIndexes = path.replaceAll("\\[\\w*\\]\\.", ".");
+
+		for (Entry<String, PropertyComparator> entry : paths.entrySet()) {
+			if (StringUtils.equalsIgnoreCase(entry.getKey(), pathNoIndexes)) {
+				compareUsingPropertyCompartor(expected, actual, path, entry.getValue(), ctx);
+				return;
+			}
+		}
+
+		for (Entry<String, PropertyComparator> entry : properties.entrySet()) {
+			if (equalsIgnoreCase(entry.getKey(), path) || equalsIgnoreCase(substringAfterLast(path, "."), entry.getKey())) {
+				compareUsingPropertyCompartor(expected, actual, path, entry.getValue(), ctx);
+				return;
+			}
+		}
+
 		final Class<? extends Object> klass = expected.getClass();
+
+		for (Entry<Class<?>, PropertyComparator> entry : types.entrySet()) {
+			if (entry.getKey().equals(klass)) {
+				compareUsingPropertyCompartor(expected, actual, path, entry.getValue(), ctx);
+				return;
+			}
+		}
+
 		if (klass.isArray()) {
-			compareArrays((Object[]) expected, (Object[]) actual, prefix, ctx);
+			compareArrays((Object[]) expected, (Object[]) actual, path, ctx);
 		} else if (klass.isAssignableFrom(String.class)) {
-			compareStrings((String) expected, (String) actual, prefix, ctx);
+			compareStrings((String) expected, (String) actual, path, ctx);
 		} else if (klass.getPackage().getName().startsWith("java.lang")) {
-			compareLangTypes(expected, actual, prefix, prefix, ctx);
+			compareLangTypes(expected, actual, path, ctx);
 		} else if (Date.class.isAssignableFrom(klass)) {
-			compareDates((Date) expected, (Date) actual, prefix, ctx);
+			compareDates((Date) expected, (Date) actual, path, ctx);
 		} else if (BigDecimal.class.isAssignableFrom(klass)) {
-			compareBigDecimals((BigDecimal) expected, (BigDecimal) actual, prefix, ctx);
+			compareBigDecimals((BigDecimal) expected, (BigDecimal) actual, path, ctx);
 		} else if (List.class.isAssignableFrom(klass)) {
-			compareLists((List) expected, (List) actual, prefix, ctx);
+			compareLists((List) expected, (List) actual, path, ctx);
 		} else if (Collection.class.isAssignableFrom(klass)) {
-			compareCollections((Collection) expected, (Collection) actual, prefix, ctx);
+			compareCollections((Collection) expected, (Collection) actual, path, ctx);
 		} else if (Map.class.isAssignableFrom(klass)) {
-			compareMaps((Map) expected, (Map) actual, prefix, ctx);
+			compareMaps((Map) expected, (Map) actual, path, ctx);
 		} else {
 			for (PropertyMethod method : getPropertyMethodsFrom(klass)) {
-				compareObjects(method.getPropertyValue(expected), method.getPropertyValue(actual), prefix + getDotIfRequired(prefix) + method.getPropertyName(), ctx);
+				compareObjects(method.getPropertyValue(expected), method.getPropertyValue(actual), path + getDotIfRequired(path) + method.getPropertyName(), ctx);
 			}
 		}
 	}
@@ -124,7 +176,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		}
 	}
 
-	public List<PropertyMethod> getPropertyMethodsFrom(final Class<? extends Object> klass) {
+	private List<PropertyMethod> getPropertyMethodsFrom(final Class<? extends Object> klass) {
 		List<PropertyMethod> properties = new ArrayList<PropertyMethod>();
 		for (Method method : klass.getMethods()) {
 			if (isPotentialProperty(method)) {
@@ -132,7 +184,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 				for (String prefix : PROPERTY_PREFIXES) {
 					if (methodName.startsWith(prefix)) {
 						String propertyName = StringUtils.substringAfter(methodName, prefix);
-						if (Character.isUpperCase(propertyName.charAt(0))) {
+						if (hasSetter(klass, method, propertyName) && isUpperCase(propertyName.charAt(0))) {
 							properties.add(new PropertyMethod(method, propertyName));
 						}
 						break;
@@ -143,13 +195,22 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		return properties;
 	}
 
+	private boolean hasSetter(final Class<? extends Object> klass, final Method method, final String propertyName) {
+		try {
+			return method.getDeclaringClass().getMethod("set" + StringUtils.capitalize(propertyName), method.getReturnType()) != null;
+		} catch (SecurityException e) {
+			return false;
+		} catch (NoSuchMethodException e) {
+			return false;
+		}
+	}
+
 	private boolean isPotentialProperty(final Method method) {
 		return method.getParameterTypes().length == 0 && !isStatic(method.getModifiers());
 	}
 
-	private void compareLangTypes(final Object expected, final Object actual, final String prefix, final String path, final MismatchContext ctx) {
-		Matcher<Object> m = equalTo(expected);
-		if (!m.matches(actual)) {
+	private void compareLangTypes(final Object expected, final Object actual, final String path, final MismatchContext ctx) {
+		if (!expected.equals(actual)) {
 			ctx.addMismatch(expected, actual, path);
 		}
 	}
@@ -182,8 +243,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	private void compareBigDecimals(final BigDecimal expected, final BigDecimal actual, final String path, final MismatchContext ctx) {
-		Matcher<?> m = comparesEqualTo(expected);
-		if (!m.matches(actual)) {
+		if (expected.compareTo(actual) != 0) {
 			ctx.addMismatch(expected, actual, path);
 		}
 	}
@@ -212,8 +272,13 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	private void compareStrings(final String expected, final String actual, final String path, final MismatchContext ctx) {
-		Matcher<String> m = Matchers.equalTo(expected);
-		if (!m.matches(actual)) {
+		if (!StringUtils.equals(expected, actual)) {
+			ctx.addMismatch(expected, actual, path);
+		}
+	}
+
+	private void compareUsingPropertyCompartor(final Object expected, final Object actual, final String path, final PropertyComparator comparator, final MismatchContext ctx) {
+		if (!comparator.isEquals(expected, actual)) {
 			ctx.addMismatch(expected, actual, path);
 		}
 	}
@@ -246,11 +311,11 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 	private static class Pair {
 
-		private final Object lhs, rhs;
+		private final int lhs, rhs;
 
 		public Pair(final Object lhs, final Object rhs) {
-			this.lhs = lhs;
-			this.rhs = rhs;
+			this.lhs = System.identityHashCode(lhs);
+			this.rhs = System.identityHashCode(rhs);
 		}
 
 		@Override
@@ -291,7 +356,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 		public void addMismatch(final Object expected, final Object actual, final String path) {
 			if (!isFirstMismatch()) {
-				desc.appendText(", ");
+				desc.appendText(SystemUtils.LINE_SEPARATOR);
 			}
 			desc.appendText(path).appendText(" is ").appendValue(actual).appendText(" instead of ").appendValue(expected);
 			same = false;

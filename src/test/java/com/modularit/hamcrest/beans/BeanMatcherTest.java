@@ -23,7 +23,7 @@ import org.junit.Test;
  * 
  * @author <a href="mailto:stewart@modular-it.co.uk">Stewart Bissett</a>
  */
-public class ObjectMatcherTest {
+public class BeanMatcherTest {
 
 	@Test
 	public void canCompareBoolean() {
@@ -87,17 +87,29 @@ public class ObjectMatcherTest {
 
 	@Test
 	public void canCompareArrays() {
-		assertThat(new String[] {"abc","xyz"}, theSameAs(new String[] {"abc","xyz"}));
+		assertThat(new String[] {
+				"abc", "xyz"
+		}, theSameAs(new String[] {
+				"abc", "xyz"
+		}));
 	}
 
 	@Test
 	public void canDetectSizeDifferences() {
-		assertThat(new String[] {"abc","xyz"}, not(theSameAs(new String[] {"abc"})));
+		assertThat(new String[] {
+				"abc", "xyz"
+		}, not(theSameAs(new String[] {
+			"abc"
+		})));
 	}
 
 	@Test
 	public void canDetectContentDifferences() {
-		assertThat(new String[] {"abc","xyz"}, not(theSameAs(new String[] {"def","xyz"})));
+		assertThat(new String[] {
+				"abc", "xyz"
+		}, not(theSameAs(new String[] {
+				"def", "xyz"
+		})));
 	}
 
 	@Test
@@ -211,8 +223,8 @@ public class ObjectMatcherTest {
 
 	public static class Branch {
 
-		private final boolean dead;
-		private final long numOfLeaves;
+		private boolean dead;
+		private long numOfLeaves;
 
 		public Branch(final boolean dead, final long numOfLeaves) {
 			this.dead = dead;
@@ -223,8 +235,16 @@ public class ObjectMatcherTest {
 			return numOfLeaves;
 		}
 
+		public void setNumOfLeaves(final long numOfLeaves) {
+			this.numOfLeaves = numOfLeaves;
+		}
+
 		public boolean isDead() {
 			return dead;
+		}
+
+		public void setDead(final boolean dead) {
+			this.dead = dead;
 		}
 	}
 
