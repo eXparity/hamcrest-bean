@@ -40,6 +40,14 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
  */
 public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
+	private class AlwaysCompareTrue implements PropertyComparator {
+
+		public boolean isEquals(final Object lhs, final Object rhs) {
+			return true;
+		}
+
+	}
+
 	/**
 	 * Interface to be implemented by classes which can compare two property values to confirm if they're equivalent
 	 */
@@ -71,6 +79,14 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 	public TheSameAs(final T object) {
 		this.object = object;
+	}
+
+	public TheSameAs<T> excludePath(final String path) {
+		return withPathComparator(path, new AlwaysCompareTrue());
+	}
+
+	public TheSameAs<T> excludeProperty(final String property) {
+		return withPropertyComparator(property, new AlwaysCompareTrue());
 	}
 
 	public TheSameAs<T> withPathComparator(final String path, final PropertyComparator comparator) {
@@ -370,5 +386,4 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 			return compared.contains(new Pair(lhs, rhs));
 		}
 	}
-
 }
