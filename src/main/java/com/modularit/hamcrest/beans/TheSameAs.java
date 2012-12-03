@@ -211,10 +211,14 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 	private void compareArrays(final Object[] expected, final Object[] actual, final String path, final MismatchContext ctx) {
 		LOG.trace("Compare path [{}] as array", path);
-		if (expected.length != actual.length) {
-			ctx.addMismatch(expected.length, actual.length, path + getDotIfRequired(path) + "size");
-		} else {
-			compareLists(Arrays.asList(expected), Arrays.asList(actual), path, ctx);
+		try {
+			if (expected.length != actual.length) {
+				ctx.addMismatch(expected.length, actual.length, path + getDotIfRequired(path) + "size");
+			} else {
+				compareLists(Arrays.asList(expected), Arrays.asList(actual), path, ctx);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Error comparing path '" + path + "'. Error '" + e.getMessage() + "'", e);
 		}
 	}
 
@@ -253,25 +257,33 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 	private void compareLangTypes(final Object expected, final Object actual, final String path, final MismatchContext ctx) {
 		LOG.trace("Compare path [{}] as lang type", path);
-		if (!expected.equals(actual)) {
-			ctx.addMismatch(expected, actual, path);
+		try {
+			if (!expected.equals(actual)) {
+				ctx.addMismatch(expected, actual, path);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Error comparing path '" + path + "'. Error '" + e.getMessage() + "'", e);
 		}
 	}
 
 	@SuppressWarnings("rawtypes")
 	private void compareMaps(final Map expected, final Map actual, final String path, final MismatchContext ctx) {
 		LOG.trace("Compare path [{}] as map", path);
-		if (expected.size() != actual.size()) {
-			ctx.addMismatch(expected.size(), actual.size(), path + getDotIfRequired(path) + "size");
-		} else {
-			for (Object key : expected.keySet()) {
-				Object expectedValue = expected.get(key), actualValue = actual.get(key);
-				if (actualValue == null) {
-					ctx.addMismatch(expectedValue, null, path + "[" + key + "]");
-				} else {
-					compareObjects(expectedValue, actualValue, path + "[" + key + "]", ctx);
+		try {
+			if (expected.size() != actual.size()) {
+				ctx.addMismatch(expected.size(), actual.size(), path + getDotIfRequired(path) + "size");
+			} else {
+				for (Object key : expected.keySet()) {
+					Object expectedValue = expected.get(key), actualValue = actual.get(key);
+					if (actualValue == null) {
+						ctx.addMismatch(expectedValue, null, path + "[" + key + "]");
+					} else {
+						compareObjects(expectedValue, actualValue, path + "[" + key + "]", ctx);
+					}
 				}
 			}
+		} catch (Exception e) {
+			throw new RuntimeException("Error comparing path '" + path + "'. Error '" + e.getMessage() + "'", e);
 		}
 	}
 
@@ -288,8 +300,12 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 	private void compareBigDecimals(final BigDecimal expected, final BigDecimal actual, final String path, final MismatchContext ctx) {
 		LOG.trace("Compare path [{}] as decimal", path);
-		if (expected.compareTo(actual) != 0) {
-			ctx.addMismatch(expected, actual, path);
+		try {
+			if (expected.compareTo(actual) != 0) {
+				ctx.addMismatch(expected, actual, path);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Error comparing path '" + path + "'. Error '" + e.getMessage() + "'", e);
 		}
 	}
 
@@ -298,37 +314,60 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	})
 	private void compareLists(final List expected, final List actual, final String path, final MismatchContext ctx) {
 		LOG.trace("Compare path [{}] as list", path);
-		if (expected.size() != actual.size()) {
-			ctx.addMismatch(expected.size(), actual.size(), path + getDotIfRequired(path) + "size");
-		} else {
-			List expectedList = new ArrayList(expected), actualList = new ArrayList(actual);
-			Collections.sort(expectedList, DEFAULT_COMPARATOR);
-			Collections.sort(actualList, DEFAULT_COMPARATOR);
-			int ctr = 0;
-			for (Iterator i = expectedList.iterator(), j = actualList.iterator(); i.hasNext();) {
-				compareObjects(i.next(), j.next(), path + "[" + (ctr++) + "]", ctx);
+		try {
+			if (expected.isEmpty() && actual.isEmpty()) {
+				return;
+			} else if (expected.size() != actual.size()) {
+				ctx.addMismatch(expected.size(), actual.size(), path + getDotIfRequired(path) + "size");
+			} else {
+				List expectedList = new ArrayList(expected), actualList = new ArrayList(actual);
+				if (expectedList.get(0) instanceof Comparable) {
+					Collections.sort(expectedList);
+					Collections.sort(actualList);
+				} else {
+					Collections.sort(expectedList, DEFAULT_COMPARATOR);
+					Collections.sort(actualList, DEFAULT_COMPARATOR);
+				}
+				int ctr = 0;
+				for (Iterator i = expectedList.iterator(), j = actualList.iterator(); i.hasNext();) {
+					compareObjects(i.next(), j.next(), path + "[" + (ctr++) + "]", ctx);
+				}
 			}
+		} catch (Exception e) {
+			throw new RuntimeException("Error comparing path '" + path + "'. Error '" + e.getMessage() + "'", e);
 		}
 	}
 
 	private void compareDates(final Date expected, final Date actual, final String path, final MismatchContext ctx) {
 		LOG.trace("Compare path [{}] as date", path);
-		if (expected.getTime() != actual.getTime()) {
-			ctx.addMismatch(expected, actual, path);
+		try {
+			if (expected.getTime() != actual.getTime()) {
+				ctx.addMismatch(expected, actual, path);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Error comparing path '" + path + "'. Error '" + e.getMessage() + "'", e);
 		}
 	}
 
 	private void compareStrings(final String expected, final String actual, final String path, final MismatchContext ctx) {
 		LOG.trace("Compare path [{}] as string", path);
-		if (!StringUtils.equals(expected, actual)) {
-			ctx.addMismatch(expected, actual, path);
+		try {
+			if (!StringUtils.equals(expected, actual)) {
+				ctx.addMismatch(expected, actual, path);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Error comparing path '" + path + "'. Error '" + e.getMessage() + "'", e);
 		}
 	}
 
 	private void compareUsingPropertyCompartor(final Object expected, final Object actual, final String path, final PropertyComparator comparator, final MismatchContext ctx) {
 		LOG.trace("Compare path [{}] with comparator [{}]", path, comparator.getClass().getSimpleName());
-		if (!comparator.isEquals(expected, actual)) {
-			ctx.addMismatch(expected, actual, path);
+		try {
+			if (!comparator.isEquals(expected, actual)) {
+				ctx.addMismatch(expected, actual, path);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Error comparing path '" + path + "'. Error '" + e.getMessage() + "'", e);
 		}
 	}
 
