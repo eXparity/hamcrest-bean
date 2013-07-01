@@ -1,11 +1,6 @@
 
 package com.modularit.hamcrest.beans;
 
-import static java.lang.Character.isUpperCase;
-import static java.lang.reflect.Modifier.isStatic;
-import static org.apache.commons.lang.StringUtils.equalsIgnoreCase;
-import static org.apache.commons.lang.StringUtils.substringAfterLast;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +24,11 @@ import org.hamcrest.Description;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.co.it.modular.beans.BeanProperty;
+import uk.co.it.modular.beans.Type;
+import static org.apache.commons.lang.StringUtils.equalsIgnoreCase;
+import static org.apache.commons.lang.StringUtils.substringAfterLast;
+import static uk.co.it.modular.beans.Type.type;
 
 /**
  * Implementation of a {@link Matcher} for performing a deep comparison of two objects by testing getters which start with <em>get</em>, <em>is</em>, or <em>has</em> are the same
@@ -61,10 +61,6 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		public int compare(final Object o1, final Object o2) {
 			return CompareToBuilder.reflectionCompare(o1, o2);
 		}
-	};
-
-	private static final String[] PROPERTY_PREFIXES = {
-			"get", "is", "has"
 	};
 
 	private final Map<String, PropertyComparator> paths = new HashMap<String, PropertyComparator>();
@@ -177,25 +173,26 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 			}
 		}
 
-		if (klass.isArray()) {
+		final Type type = type(klass);
+		if (type.isArray()) {
 			compareArrays((Object[]) expected, (Object[]) actual, path, ctx);
-		} else if (klass.isAssignableFrom(String.class)) {
+		} else if (type.is(String.class)) {
 			compareStrings((String) expected, (String) actual, path, ctx);
-		} else if (klass.getPackage().getName().startsWith("java.lang")) {
+		} else if (type.packageName().startsWith("java.lang")) {
 			compareLangTypes(expected, actual, path, ctx);
-		} else if (Date.class.isAssignableFrom(klass)) {
+		} else if (type.is(Date.class)) {
 			compareDates((Date) expected, (Date) actual, path, ctx);
-		} else if (BigDecimal.class.isAssignableFrom(klass)) {
+		} else if (type.is(BigDecimal.class)) {
 			compareBigDecimals((BigDecimal) expected, (BigDecimal) actual, path, ctx);
-		} else if (List.class.isAssignableFrom(klass)) {
+		} else if (type.is(List.class)) {
 			compareLists((List) expected, (List) actual, path, ctx);
-		} else if (Collection.class.isAssignableFrom(klass)) {
+		} else if (type.is(Collection.class)) {
 			compareCollections((Collection) expected, (Collection) actual, path, ctx);
-		} else if (Map.class.isAssignableFrom(klass)) {
+		} else if (type.is(Map.class)) {
 			compareMaps((Map) expected, (Map) actual, path, ctx);
 		} else {
-			for (PropertyMethod method : getPropertyMethodsFrom(klass)) {
-				compareObjects(method.getPropertyValue(expected), method.getPropertyValue(actual), path + getDotIfRequired(path) + method.getPropertyName(), ctx);
+			for (BeanProperty property : type.propertyList()) {
+				compareObjects(property.getValue(expected), property.getValue(actual), path + getDotIfRequired(path) + property.getName(), ctx);
 			}
 		}
 	}
@@ -220,39 +217,6 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		} catch (Exception e) {
 			throw new RuntimeException("Error comparing path '" + path + "'. Error '" + e.getMessage() + "'", e);
 		}
-	}
-
-	private List<PropertyMethod> getPropertyMethodsFrom(final Class<? extends Object> klass) {
-		List<PropertyMethod> properties = new ArrayList<PropertyMethod>();
-		for (Method method : klass.getMethods()) {
-			if (isPotentialProperty(method)) {
-				String methodName = method.getName();
-				for (String prefix : PROPERTY_PREFIXES) {
-					if (methodName.startsWith(prefix)) {
-						String propertyName = StringUtils.substringAfter(methodName, prefix);
-						if (hasSetter(klass, method, propertyName) && isUpperCase(propertyName.charAt(0))) {
-							properties.add(new PropertyMethod(method, propertyName));
-						}
-						break;
-					}
-				}
-			}
-		}
-		return properties;
-	}
-
-	private boolean hasSetter(final Class<? extends Object> klass, final Method method, final String propertyName) {
-		try {
-			return method.getDeclaringClass().getMethod("set" + StringUtils.capitalize(propertyName), method.getReturnType()) != null;
-		} catch (SecurityException e) {
-			return false;
-		} catch (NoSuchMethodException e) {
-			return false;
-		}
-	}
-
-	private boolean isPotentialProperty(final Method method) {
-		return method.getParameterTypes().length == 0 && !isStatic(method.getModifiers());
 	}
 
 	private void compareLangTypes(final Object expected, final Object actual, final String path, final MismatchContext ctx) {
@@ -368,32 +332,6 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 			}
 		} catch (Exception e) {
 			throw new RuntimeException("Error comparing path '" + path + "'. Error '" + e.getMessage() + "'", e);
-		}
-	}
-
-	/**
-	 * Encapsulation of a java {@link Method} object
-	 */
-	private static class PropertyMethod {
-
-		private final Method method;
-		private final String propertyName;
-
-		public PropertyMethod(final Method method, final String propertyName) {
-			this.method = method;
-			this.propertyName = StringUtils.uncapitalize(propertyName);
-		}
-
-		public Object getPropertyValue(final Object obj) {
-			try {
-				return method.invoke(obj);
-			} catch (Exception e) {
-				throw new RuntimeException("Error matching " + method + " on " + obj.getClass(), e);
-			}
-		}
-
-		public String getPropertyName() {
-			return propertyName;
 		}
 	}
 
