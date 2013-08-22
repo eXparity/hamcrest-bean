@@ -9,6 +9,12 @@
 	<url>https://github.com/modularit/hamcrest-bean</url>
 	<description>Suite of Hamcrest matchers for testing classes which follow the Java Beans standards</description>
 
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
+
 	<licenses>
 		<license>
 			<name>New BSD License</name>
