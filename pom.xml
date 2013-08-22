@@ -3,7 +3,7 @@
 
 	<groupId>uk.co.modular-it</groupId>
 	<artifactId>hamcrest-bean</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>0.9.0-SNAPSHOT</version>
 
 	<name>Hamcrest Bean</name>
 	<url>https://github.com/modularit/hamcrest-bean</url>
@@ -46,7 +46,7 @@
 		<dependency>
 			<groupId>uk.co.modular-it</groupId>
 			<artifactId>bean-utils</artifactId>
-			<version>0.9.4-SNAPSHOT</version>
+			<version>0.9.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -57,6 +57,12 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.10</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.0.7</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
