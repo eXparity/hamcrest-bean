@@ -2,9 +2,8 @@
  * Copyright (c) Modular IT Limited.
  */
 
-package com.modularit.hamcrest.beans;
+package uk.co.it.modular.hamcrest.beans;
 
-import static com.modularit.hamcrest.beans.BeanMatchers.*;
 import static java.util.Collections.*;
 import static org.apache.commons.lang.time.DateUtils.*;
 import static org.hamcrest.MatcherAssert.*;
@@ -17,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
+import static uk.co.it.modular.hamcrest.beans.BeanMatchers.*;
 
 /**
  * Unit Test for {@link ObjectMatchers}

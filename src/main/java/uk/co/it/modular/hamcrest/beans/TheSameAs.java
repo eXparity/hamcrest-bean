@@ -1,5 +1,5 @@
 
-package com.modularit.hamcrest.beans;
+package uk.co.it.modular.hamcrest.beans;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

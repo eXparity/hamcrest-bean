@@ -2,7 +2,7 @@
  * Copyright (c) Modular IT Limited.
  */
 
-package com.modularit.hamcrest.beans;
+package uk.co.it.modular.hamcrest.beans;
 
 /**
  * Static factory for creating {@link Matcher} instances for comparing objects
