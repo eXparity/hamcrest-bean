@@ -24,7 +24,7 @@ import org.hamcrest.Description;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.co.it.modular.beans.TypeProperty;
+import uk.co.it.modular.beans.ImmutableTypeProperty;
 import uk.co.it.modular.beans.Type;
 import static org.apache.commons.lang.StringUtils.equalsIgnoreCase;
 import static org.apache.commons.lang.StringUtils.substringAfterLast;
@@ -191,7 +191,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		} else if (type.is(Map.class)) {
 			compareMaps((Map) expected, (Map) actual, path, ctx);
 		} else {
-			for (TypeProperty property : type.propertyList()) {
+			for (ImmutableTypeProperty property : type.accessorList()) {
 				compareObjects(property.getValue(expected), property.getValue(actual), path + getDotIfRequired(path) + property.getName(), ctx);
 			}
 		}
@@ -389,7 +389,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		}
 
 		private boolean isFirstMismatch() {
-			return same;
+			return same == true;
 		}
 
 		public boolean hasComparedPair(final Object lhs, final Object rhs) {
