@@ -1,8 +1,4 @@
-/*
- * Copyright (c) Modular IT Limited.
- */
-
-package uk.co.it.modular.hamcrest.beans;
+package org.exparity.hamcrest.beans;
 
 /**
  * Static factory for creating {@link Matcher} instances for comparing objects

@@ -1,6 +1,7 @@
 
-package uk.co.it.modular.hamcrest.beans;
+package org.exparity.hamcrest.beans;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,11 +25,11 @@ import org.hamcrest.Description;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.co.it.modular.beans.ImmutableTypeProperty;
-import uk.co.it.modular.beans.Type;
+import org.exparity.beans.ImmutableTypeProperty;
+import org.exparity.beans.Type;
 import static org.apache.commons.lang.StringUtils.equalsIgnoreCase;
 import static org.apache.commons.lang.StringUtils.substringAfterLast;
-import static uk.co.it.modular.beans.Type.type;
+import static org.exparity.beans.Type.type;
 
 /**
  * Implementation of a {@link Matcher} for performing a deep comparison of two objects by testing getters which start with <em>get</em>, <em>is</em>, or <em>has</em> are the same
@@ -41,6 +42,10 @@ import static uk.co.it.modular.beans.Type.type;
  * @author <a href="mailto:stewart@modular-it.co.uk">Stewart Bissett</a>
  */
 public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
+
+	private static final String[] DEFAULT_EXCLUDED_PROPERTIES = new String[] {
+			"class", "Class"
+	};
 
 	private static final Logger LOG = LoggerFactory.getLogger(TheSameAs.class);
 
@@ -67,7 +72,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	private final Map<String, PropertyComparator> properties = new HashMap<String, PropertyComparator>();
 	private final Map<Class<?>, PropertyComparator> types = new HashMap<Class<?>, PropertyComparator>();
 	private final Set<String> excludedPaths = new HashSet<String>();
-	private final Set<String> excludedProperties = new HashSet<String>();
+	private final Set<String> excludedProperties = new HashSet<String>(Arrays.asList(DEFAULT_EXCLUDED_PROPERTIES));
 
 	private final T object;
 
@@ -175,7 +180,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 		final Type type = type(klass);
 		if (type.isArray()) {
-			compareArrays((Object[]) expected, (Object[]) actual, path, ctx);
+			compareArrays(expected, actual, path, ctx);
 		} else if (type.is(String.class)) {
 			compareStrings((String) expected, (String) actual, path, ctx);
 		} else if (type.packageName().startsWith("java.lang")) {
@@ -206,13 +211,18 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		return null;
 	}
 
-	private void compareArrays(final Object[] expected, final Object[] actual, final String path, final MismatchContext ctx) {
+	private void compareArrays(final Object expected, final Object actual, final String path, final MismatchContext ctx) {
 		LOG.trace("Compare path [{}] as array", path);
 		try {
-			if (expected.length != actual.length) {
-				ctx.addMismatch(expected.length, actual.length, path + getDotIfRequired(path) + "size");
+			int expectedLength = Array.getLength(expected), actualLength = Array.getLength(actual);
+			if (expectedLength != actualLength) {
+				ctx.addMismatch(expectedLength, actualLength, path + getDotIfRequired(path) + "size");
 			} else {
-				compareLists(Arrays.asList(expected), Arrays.asList(actual), path, ctx);
+				for (int i = 0; i < expectedLength; ++i) {
+					if (!Array.get(expected, i).equals(Array.get(actual, i))) {
+						ctx.addMismatch(expected, actual, path + getDotIfRequired(path));
+					}
+				}
 			}
 		} catch (Exception e) {
 			throw new RuntimeException("Error comparing path '" + path + "'. Error '" + e.getMessage() + "'", e);

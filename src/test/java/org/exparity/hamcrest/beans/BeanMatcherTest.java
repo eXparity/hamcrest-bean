@@ -1,13 +1,5 @@
-/*
- * Copyright (c) Modular IT Limited.
- */
+package org.exparity.hamcrest.beans;
 
-package uk.co.it.modular.hamcrest.beans;
-
-import static java.util.Collections.*;
-import static org.apache.commons.lang.time.DateUtils.*;
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
-import static uk.co.it.modular.hamcrest.beans.BeanMatchers.*;
+import static java.util.Collections.singletonMap;
+import static org.apache.commons.lang.time.DateUtils.addDays;
+import static org.exparity.hamcrest.beans.BeanMatchers.theSameAs;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
 
 /**
  * Unit Test for {@link ObjectMatchers}
@@ -95,20 +91,38 @@ public class BeanMatcherTest {
 	}
 
 	@Test
-	public void canDetectSizeDifferences() {
+	public void canCompareArrayOfBytes() {
+		assertThat(new byte[] {
+				0x01, 0x02
+		}, theSameAs(new byte[] {
+				0x01, 0x02
+		}));
+	}
+
+	@Test
+	public void canDetectArraySizeDifferences() {
 		assertThat(new String[] {
 				"abc", "xyz"
 		}, not(theSameAs(new String[] {
-			"abc"
+				"abc"
 		})));
 	}
 
 	@Test
-	public void canDetectContentDifferences() {
+	public void canDetectContentDifferencesInStringArrays() {
 		assertThat(new String[] {
 				"abc", "xyz"
 		}, not(theSameAs(new String[] {
 				"def", "xyz"
+		})));
+	}
+
+	@Test
+	public void canDetectContentDifferencesInByteArrays() {
+		assertThat(new byte[] {
+				0x01, 0x02
+		}, not(theSameAs(new byte[] {
+				0x02, 0x01
 		})));
 	}
 
