@@ -6,8 +6,8 @@
 	<version>0.9.4-SNAPSHOT</version>
 
 	<name>Hamcrest Bean</name>
-	<url>https://github.com/modularit/hamcrest-bean</url>
-	<description>Suite of Hamcrest matchers for testing classes which follow the Java Beans standards</description>
+	<url>https://github.com/exparity/hamcrest-bean</url>
+	<description>A Java library which provides a hamcrest matcher for matching objects and graphs which follow the Java beans standard</description>
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -24,9 +24,9 @@
 	</licenses>
 
 	<scm>
-		<connection>scm:git:@github.com:modularit/hamcrest-bean.git</connection>
-		<developerConnection>scm:git:git@github.com:modularit/hamcrest-bean.git</developerConnection>
-		<url>git@github.com:modularit/hamcrest-bean.git</url>
+		<connection>scm:git:@github.com:exparity/hamcrest-bean.git</connection>
+		<developerConnection>scm:git:git@github.com:exparity/hamcrest-bean.git</developerConnection>
+		<url>git@github.com:exparity/hamcrest-bean.git</url>
 	</scm>
 
 	<developers>
@@ -73,5 +73,17 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<additionalparam>-Xdoclint:none</additionalparam>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>
