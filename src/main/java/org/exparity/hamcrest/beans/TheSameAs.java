@@ -21,13 +21,16 @@ import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.exparity.beans.ImmutableTypeProperty;
+import org.exparity.beans.Type;
+import org.exparity.beans.naming.CapitalizedNamingStrategy;
+import org.exparity.hamcrest.beans.comparators.Ignored;
+import org.exparity.hamcrest.beans.comparators.IsComparable;
+import org.exparity.hamcrest.beans.comparators.IsEquals;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.exparity.beans.ImmutableTypeProperty;
-import org.exparity.beans.Type;
-import static org.apache.commons.lang.StringUtils.equalsIgnoreCase;
 import static org.apache.commons.lang.StringUtils.substringAfterLast;
 import static org.exparity.beans.Type.type;
 
@@ -39,7 +42,7 @@ import static org.exparity.beans.Type.type;
  * one will built using {@link org.apache.commons.lang.builder.CompareToBuilder#reflectionCompare(Object, Object)}
  * </p>
  * 
- * @author <a href="mailto:stewart@modular-it.co.uk">Stewart Bissett</a>
+ * @author Stewart Bissett
  */
 public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
@@ -55,9 +58,9 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	public interface PropertyComparator {
 
 		/**
-		 * Return <code>true</code> if both objects are equal
+		 * Return <code>true</code> if the actual value matches the expected value
 		 */
-		public boolean isEquals(final Object lhs, final Object rhs);
+		public boolean matches(final Object lhs, final Object rhs);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -75,32 +78,159 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	private final Set<String> excludedProperties = new HashSet<String>(Arrays.asList(DEFAULT_EXCLUDED_PROPERTIES));
 
 	private final T object;
+	private final String name;
 
 	public TheSameAs(final T object) {
+		this(object, object.getClass().getSimpleName());
+	}
+
+	public TheSameAs(final T object, final String name) {
+		this.types.put(BigDecimal.class, new IsComparable());
+		this.types.put(String.class, new IsEquals());
+		this.types.put(Integer.class, new IsEquals());
+		this.types.put(Long.class, new IsEquals());
+		this.types.put(Double.class, new IsEquals());
+		this.types.put(Float.class, new IsEquals());
+		this.types.put(Character.class, new IsEquals());
+		this.types.put(Date.class, new IsComparable());
+		this.types.put(Class.class, new Ignored());
 		this.object = object;
+		this.name = name;
 	}
 
+	/**
+	 * Exclude a property path from the comparison. For example</p>
+	 * 
+	 * <pre>
+	 * class Person [
+	 *   private String firstName, lastName;
+	 *   public Person(final String firstName, final String lastName) {
+	 *     this.firstname = firstName;
+	 *     this.lastName = lastName;
+	 *    }
+	 *    public String getFirstName() { return firstName;};
+	 *    public String getLastName() { return lastName;};
+	 * }
+	 * 
+	 * // Testing a simple object is the same except for a property
+	 * Person expected = new Person("Jane", "Doe");
+	 * MatcherAssert.assertThat(new Person("John", "Doe"), BeanMatchers.theSameAs(expected).excludePath("Person.LastName"));
+	 * </pre>
+	 * 
+	 * @param property the path to exclude from the comparison e.g Person.LastName
+	 * @return the current matcher
+	 */
 	public TheSameAs<T> excludePath(final String path) {
-		this.excludedPaths.add(path);
+		this.excludedPaths.add(path.toLowerCase());
 		return this;
 	}
 
+	/**
+	 * Exclude a property from the comparison. For example</p>
+	 * 
+	 * <pre>
+	 * class Person [
+	 *   private String firstName, lastName;
+	 *   public Person(final String firstName, final String lastName) {
+	 *     this.firstname = firstName;
+	 *     this.lastName = lastName;
+	 *    }
+	 *    public String getFirstName() { return firstName;};
+	 *    public String getLastName() { return lastName;};
+	 * }
+	 * 
+	 * // Testing a simple object is the same except for a property
+	 * Person expected = new Person("Jane", "Doe");
+	 * MatcherAssert.assertThat(new Person("John", "Doe"), BeanMatchers.theSameAs(expected).excludeProperty("LastName"));
+	 * </pre>
+	 * 
+	 * @param property the property to exclude from the comparison e.g LastName
+	 * @return the current matcher
+	 */
 	public TheSameAs<T> excludeProperty(final String property) {
-		this.excludedProperties.add(property);
+		this.excludedProperties.add(property.toLowerCase());
 		return this;
 	}
 
-	public TheSameAs<T> withPathComparator(final String path, final PropertyComparator comparator) {
-		this.paths.put(path, comparator);
+	/**
+	 * Override the PropertyComparator used for a path. For example</p>
+	 * 
+	 * <pre>
+	 * class Person [
+	 *   private String firstName, lastName;
+	 *   public Person(final String firstName, final String lastName) {
+	 *     this.firstname = firstName;
+	 *     this.lastName = lastName;
+	 *    }
+	 *    public String getFirstName() { return firstName;};
+	 *    public String getLastName() { return lastName;};
+	 * }
+	 * 
+	 * // Testing a simple object is the same except for a property
+	 * Person expected = new Person("John", "Doe");
+	 * MatcherAssert.assertThat(new Person("john", "doe"), BeanMatchers.theSameAs(expected).comparePath("Person.LastName", new IsEqualsIgnoreCase());
+	 * </pre>
+	 * 
+	 * @param property the property to exclude from the comparison e.g LastName
+	 * @return the current matcher
+	 */
+	public TheSameAs<T> comparePath(final String path, final PropertyComparator comparator) {
+		this.paths.put(path.toLowerCase(), comparator);
 		return this;
 	}
 
-	public TheSameAs<T> withPropertyComparator(final String path, final PropertyComparator comparator) {
-		this.properties.put(path, comparator);
+	/**
+	 * Override the PropertyComparator used for a property. For example</p>
+	 * 
+	 * <pre>
+	 * class Person [
+	 *   private String firstName, lastName;
+	 *   public Person(final String firstName, final String lastName) {
+	 *     this.firstname = firstName;
+	 *     this.lastName = lastName;
+	 *    }
+	 *    public String getFirstName() { return firstName;};
+	 *    public String getLastName() { return lastName;};
+	 * }
+	 * 
+	 * // Testing a simple object is the same except for a property
+	 * Person expected = new Person("John", "Doe");
+	 * MatcherAssert.assertThat(new Person("john", "doe"), BeanMatchers.theSameAs(expected).comparePath("Person.LastName", new IsEqualsIgnoreCase());
+	 * </pre>
+	 * 
+	 * @param path the path to set the comparator for
+	 * @param comparator the comparator to use
+	 * @return the current matcher
+	 */
+	public TheSameAs<T> compareProperty(final String path, final PropertyComparator comparator) {
+		this.properties.put(path.toLowerCase(), comparator);
 		return this;
 	}
 
-	public TheSameAs<T> withTypeComparator(final Class<?> type, final PropertyComparator comparator) {
+	/**
+	 * Override the PropertyComparator used for a type. For example</p>
+	 * 
+	 * <pre>
+	 * class Person [
+	 *   private String firstName, lastName;
+	 *   public Person(final String firstName, final String lastName) {
+	 *     this.firstname = firstName;
+	 *     this.lastName = lastName;
+	 *    }
+	 *    public String getFirstName() { return firstName;};
+	 *    public String getLastName() { return lastName;};
+	 * }
+	 * 
+	 * // Testing a simple object is the same except for a property
+	 * Person expected = new Person("John", "Doe");
+	 * MatcherAssert.assertThat(new Person("john", "doe"), BeanMatchers.theSameAs(expected).compareType(String.class, new IsEqualsIgnoreCase());
+	 * </pre>
+	 * 
+	 * @param type the type to set the comparator for
+	 * @param comparator the comparator to use
+	 * @return the current matcher
+	 */
+	public TheSameAs<T> compareType(final Class<?> type, final PropertyComparator comparator) {
 		this.types.put(type, comparator);
 		return this;
 	}
@@ -108,7 +238,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	@Override
 	protected boolean matchesSafely(final T item, final Description mismatchDesc) {
 		MismatchContext context = new MismatchContext(mismatchDesc);
-		compareObjects(object, item, "", context);
+		compareObjects(object, item, name, context);
 		return context.areSame();
 	}
 
@@ -123,15 +253,15 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 				expected, actual, path
 		});
 
-		String pathNoIndexes = path.replaceAll("\\[\\w*\\]\\.", ".");
+		String pathNoIndexes = path.replaceAll("\\[\\w*\\]\\.", ".").toLowerCase();
 		if (excludedPaths.contains(pathNoIndexes)) {
-			LOG.trace("Ignore path [{}]", pathNoIndexes);
+			LOG.debug("Ignore path [{}]", pathNoIndexes);
 			return;
 		}
 
 		String propertyName = StringUtils.contains(path, ".") ? substringAfterLast(pathNoIndexes, ".") : pathNoIndexes;
 		if (excludedProperties.contains(propertyName)) {
-			LOG.trace("Ignore property [{}]", propertyName);
+			LOG.debug("Ignore property [{}]", propertyName);
 			return;
 		}
 
@@ -156,8 +286,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 		LOG.trace("Check override for path [{}]", pathNoIndexes);
 		for (Entry<String, PropertyComparator> entry : paths.entrySet()) {
-			if (StringUtils.equalsIgnoreCase(entry.getKey(), pathNoIndexes)) {
-				compareUsingPropertyCompartor(expected, actual, path, entry.getValue(), ctx);
+			if (entry.getKey().equals(pathNoIndexes)) {
+				compareUsingPropertyComparator(expected, actual, path, entry.getValue(), ctx);
 				return;
 			}
 		}
@@ -165,7 +295,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		LOG.trace("Check override for property [{}]", propertyName);
 		PropertyComparator comparator = getPropertyComparator(propertyName);
 		if (comparator != null) {
-			compareUsingPropertyCompartor(expected, actual, path, comparator, ctx);
+			compareUsingPropertyComparator(expected, actual, path, comparator, ctx);
 			return;
 		}
 
@@ -173,22 +303,16 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		LOG.trace("Check override for type [{}]", klass);
 		for (Entry<Class<?>, PropertyComparator> entry : types.entrySet()) {
 			if (entry.getKey().equals(klass)) {
-				compareUsingPropertyCompartor(expected, actual, path, entry.getValue(), ctx);
+				compareUsingPropertyComparator(expected, actual, path, entry.getValue(), ctx);
 				return;
 			}
 		}
 
-		final Type type = type(klass);
+		final Type type = type(klass).setNamingStrategy(new CapitalizedNamingStrategy());
 		if (type.isArray()) {
 			compareArrays(expected, actual, path, ctx);
-		} else if (type.is(String.class)) {
-			compareStrings((String) expected, (String) actual, path, ctx);
 		} else if (type.packageName().startsWith("java.lang")) {
 			compareLangTypes(expected, actual, path, ctx);
-		} else if (type.is(Date.class)) {
-			compareDates((Date) expected, (Date) actual, path, ctx);
-		} else if (type.is(BigDecimal.class)) {
-			compareBigDecimals((BigDecimal) expected, (BigDecimal) actual, path, ctx);
 		} else if (type.is(List.class)) {
 			compareLists((List) expected, (List) actual, path, ctx);
 		} else if (type.is(Collection.class)) {
@@ -204,7 +328,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 	private PropertyComparator getPropertyComparator(final String propertyName) {
 		for (Entry<String, PropertyComparator> entry : properties.entrySet()) {
-			if (equalsIgnoreCase(propertyName, entry.getKey())) {
+			if (propertyName.equals(entry.getKey())) {
 				return entry.getValue();
 			}
 		}
@@ -212,7 +336,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	private void compareArrays(final Object expected, final Object actual, final String path, final MismatchContext ctx) {
-		LOG.trace("Compare path [{}] as array", path);
+		LOG.debug("Compare path [{}] as array", path);
 		try {
 			int expectedLength = Array.getLength(expected), actualLength = Array.getLength(actual);
 			if (expectedLength != actualLength) {
@@ -230,7 +354,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	private void compareLangTypes(final Object expected, final Object actual, final String path, final MismatchContext ctx) {
-		LOG.trace("Compare path [{}] as lang type", path);
+		LOG.debug("Compare path [{}] as lang type", path);
 		try {
 			if (!expected.equals(actual)) {
 				ctx.addMismatch(expected, actual, path);
@@ -242,7 +366,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 	@SuppressWarnings("rawtypes")
 	private void compareMaps(final Map expected, final Map actual, final String path, final MismatchContext ctx) {
-		LOG.trace("Compare path [{}] as map", path);
+		LOG.debug("Compare path [{}] as map", path);
 		try {
 			if (expected.size() != actual.size()) {
 				ctx.addMismatch(expected.size(), actual.size(), path + getDotIfRequired(path) + "size");
@@ -272,22 +396,11 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		compareLists(new ArrayList(expected), new ArrayList(actual), path, ctx);
 	}
 
-	private void compareBigDecimals(final BigDecimal expected, final BigDecimal actual, final String path, final MismatchContext ctx) {
-		LOG.trace("Compare path [{}] as decimal", path);
-		try {
-			if (expected.compareTo(actual) != 0) {
-				ctx.addMismatch(expected, actual, path);
-			}
-		} catch (Exception e) {
-			throw new RuntimeException("Error comparing path '" + path + "'. Error '" + e.getMessage() + "'", e);
-		}
-	}
-
 	@SuppressWarnings({
 			"unchecked", "rawtypes"
 	})
 	private void compareLists(final List expected, final List actual, final String path, final MismatchContext ctx) {
-		LOG.trace("Compare path [{}] as list", path);
+		LOG.debug("Compare path [{}] as list", path);
 		try {
 			if (expected.isEmpty() && actual.isEmpty()) {
 				return;
@@ -312,33 +425,11 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		}
 	}
 
-	private void compareDates(final Date expected, final Date actual, final String path, final MismatchContext ctx) {
-		LOG.trace("Compare path [{}] as date", path);
+	private void compareUsingPropertyComparator(final Object lhs, final Object rhs, final String path, final PropertyComparator comparator, final MismatchContext ctx) {
+		LOG.debug("Compare path [{}] using comparator [{}]", path, comparator.getClass().getSimpleName());
 		try {
-			if (expected.getTime() != actual.getTime()) {
-				ctx.addMismatch(expected, actual, path);
-			}
-		} catch (Exception e) {
-			throw new RuntimeException("Error comparing path '" + path + "'. Error '" + e.getMessage() + "'", e);
-		}
-	}
-
-	private void compareStrings(final String expected, final String actual, final String path, final MismatchContext ctx) {
-		LOG.trace("Compare path [{}] as string", path);
-		try {
-			if (!StringUtils.equals(expected, actual)) {
-				ctx.addMismatch(expected, actual, path);
-			}
-		} catch (Exception e) {
-			throw new RuntimeException("Error comparing path '" + path + "'. Error '" + e.getMessage() + "'", e);
-		}
-	}
-
-	private void compareUsingPropertyCompartor(final Object expected, final Object actual, final String path, final PropertyComparator comparator, final MismatchContext ctx) {
-		LOG.trace("Compare path [{}] with comparator [{}]", path, comparator.getClass().getSimpleName());
-		try {
-			if (!comparator.isEquals(expected, actual)) {
-				ctx.addMismatch(expected, actual, path);
+			if (!comparator.matches(lhs, rhs)) {
+				ctx.addMismatch(lhs, rhs, path);
 			}
 		} catch (Exception e) {
 			throw new RuntimeException("Error comparing path '" + path + "'. Error '" + e.getMessage() + "'", e);
