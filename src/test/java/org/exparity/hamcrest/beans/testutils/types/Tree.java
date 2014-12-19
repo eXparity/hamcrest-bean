@@ -1,9 +1,11 @@
+
 package org.exparity.hamcrest.beans.testutils.types;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import static org.exparity.dates.en.FluentDate.AUG;
 
 public class Tree {
 
@@ -14,7 +16,7 @@ public class Tree {
 	private double weight = 4.56;
 	private BigDecimal height = new BigDecimal(10.98);
 	private float girth = 2.34f;
-	private Date germinationDate = new Date();
+	private Date germinationDate = AUG(9, 1975);
 	private boolean deciduous = true;
 
 	public String getName() {
