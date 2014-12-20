@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import org.exparity.hamcrest.beans.TheSameAs.PropertyComparator;
 import org.exparity.hamcrest.beans.comparators.HasPattern;
 import org.exparity.hamcrest.beans.testutils.types.Branch;
 import org.exparity.hamcrest.beans.testutils.types.Tree;
@@ -236,6 +237,14 @@ public class TheSameAsTest {
 	}
 
 	@Test
+	public void canExcludeType() {
+		Tree reference = new Tree(), sample = new Tree();
+		reference.addBranches(Arrays.asList(new Branch(false, 1234)));
+		sample.addBranches(Arrays.asList(new Branch(true, 0)));
+		assertThat(sample, theSameAs(reference).excludeType(Branch.class));
+	}
+
+	@Test
 	public void canExcludePath() {
 		Tree reference = new Tree();
 		reference.setName("Oak");
@@ -276,11 +285,27 @@ public class TheSameAsTest {
 	}
 
 	@Test
-	public void canOverrideTypeComparator() {
+	public void canOverrideTypeComparatorLangType() {
 		Tree reference = new Tree();
 		reference.setName("Oak");
 		Tree sample = new Tree();
 		sample.setName("Olive");
 		assertThat(sample, theSameAs(reference).compareType(String.class, new HasPattern("O.*")));
 	}
+
+	@Test
+	public void canOverrideTypeComparator() {
+		Tree reference = new Tree();
+		reference.setMainBranch(new Branch(true, 1000));
+		Tree sample = new Tree();
+		sample.setMainBranch(new Branch(false, 0));
+		assertThat(sample, theSameAs(reference).compareType(Branch.class, new PropertyComparator() {
+
+			@Override
+			public boolean matches(final Object lhs, final Object rhs) {
+				return true;
+			}
+		}));
+	}
+
 }

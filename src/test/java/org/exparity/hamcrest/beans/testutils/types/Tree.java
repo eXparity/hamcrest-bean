@@ -10,6 +10,7 @@ import static org.exparity.dates.en.FluentDate.AUG;
 public class Tree {
 
 	private List<Branch> branches = new ArrayList<Branch>();
+	private Branch mainBranch = new Branch(false, 100);
 	private String name = "Oak";
 	private int age = 1;
 	private long numOfBranches = 20000L;
@@ -93,6 +94,14 @@ public class Tree {
 
 	public void addBranches(final List<Branch> branches) {
 		this.branches.addAll(branches);
+	}
+
+	public void setMainBranch(final Branch mainBranch) {
+		this.mainBranch = mainBranch;
+	}
+
+	public Branch getMainBranch() {
+		return mainBranch;
 	}
 
 	@Override

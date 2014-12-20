@@ -4,7 +4,6 @@ package org.exparity.hamcrest.beans;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -24,7 +23,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.exparity.beans.ImmutableTypeProperty;
 import org.exparity.beans.Type;
 import org.exparity.beans.naming.CapitalizedNamingStrategy;
-import org.exparity.hamcrest.beans.comparators.Ignored;
+import org.exparity.hamcrest.beans.comparators.Excluded;
 import org.exparity.hamcrest.beans.comparators.IsComparable;
 import org.exparity.hamcrest.beans.comparators.IsEquals;
 import org.hamcrest.Description;
@@ -45,10 +44,6 @@ import static org.exparity.beans.Type.type;
  * @author Stewart Bissett
  */
 public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
-
-	private static final String[] DEFAULT_EXCLUDED_PROPERTIES = new String[] {
-			"class", "Class"
-	};
 
 	private static final Logger LOG = LoggerFactory.getLogger(TheSameAs.class);
 
@@ -74,8 +69,6 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	private final Map<String, PropertyComparator> paths = new HashMap<String, PropertyComparator>();
 	private final Map<String, PropertyComparator> properties = new HashMap<String, PropertyComparator>();
 	private final Map<Class<?>, PropertyComparator> types = new HashMap<Class<?>, PropertyComparator>();
-	private final Set<String> excludedPaths = new HashSet<String>();
-	private final Set<String> excludedProperties = new HashSet<String>(Arrays.asList(DEFAULT_EXCLUDED_PROPERTIES));
 
 	private final T object;
 	private final String name;
@@ -93,7 +86,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		this.types.put(Float.class, new IsEquals());
 		this.types.put(Character.class, new IsEquals());
 		this.types.put(Date.class, new IsComparable());
-		this.types.put(Class.class, new Ignored());
+		this.types.put(Class.class, new Excluded());
 		this.object = object;
 		this.name = name;
 	}
@@ -121,7 +114,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * @return the current matcher
 	 */
 	public TheSameAs<T> excludePath(final String path) {
-		this.excludedPaths.add(path.toLowerCase());
+		this.paths.put(path.toLowerCase(), new Excluded());
 		return this;
 	}
 
@@ -148,7 +141,34 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * @return the current matcher
 	 */
 	public TheSameAs<T> excludeProperty(final String property) {
-		this.excludedProperties.add(property.toLowerCase());
+		this.properties.put(property.toLowerCase(), new Excluded());
+		return this;
+	}
+
+	/**
+	 * Exclude a type from the comparison. For example</p>
+	 * 
+	 * <pre>
+	 * class Person [
+	 *   private String firstName, lastName;
+	 *   public Person(final String firstName, final String lastName) {
+	 *     this.firstname = firstName;
+	 *     this.lastName = lastName;
+	 *    }
+	 *    public String getFirstName() { return firstName;};
+	 *    public String getLastName() { return lastName;};
+	 * }
+	 * 
+	 * // Testing a simple object is the same except for a property
+	 * Person expected = new Person("Jane", "Doe");
+	 * MatcherAssert.assertThat(new Person("John", "Doe"), BeanMatchers.theSameAs(expected).excludeType(String.class));
+	 * </pre>
+	 * 
+	 * @param type the type to exclude from the comparison e.g String.class
+	 * @return the current matcher
+	 */
+	public TheSameAs<T> excludeType(final Class<?> type) {
+		this.types.put(type, new Excluded());
 		return this;
 	}
 
@@ -254,16 +274,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		});
 
 		String pathNoIndexes = path.replaceAll("\\[\\w*\\]\\.", ".").toLowerCase();
-		if (excludedPaths.contains(pathNoIndexes)) {
-			LOG.debug("Ignore path [{}]", pathNoIndexes);
-			return;
-		}
-
 		String propertyName = StringUtils.contains(path, ".") ? substringAfterLast(pathNoIndexes, ".") : pathNoIndexes;
-		if (excludedProperties.contains(propertyName)) {
-			LOG.debug("Ignore property [{}]", propertyName);
-			return;
-		}
 
 		if (expected == null) {
 			if (actual != null) {
@@ -285,24 +296,23 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		}
 
 		LOG.trace("Check override for path [{}]", pathNoIndexes);
-		for (Entry<String, PropertyComparator> entry : paths.entrySet()) {
-			if (entry.getKey().equals(pathNoIndexes)) {
-				compareUsingPropertyComparator(expected, actual, path, entry.getValue(), ctx);
-				return;
-			}
+		PropertyComparator pathComparator = paths.get(pathNoIndexes);
+		if (pathComparator != null) {
+			compareUsingPropertyComparator(expected, actual, path, pathComparator, ctx);
+			return;
 		}
 
 		LOG.trace("Check override for property [{}]", propertyName);
-		PropertyComparator comparator = getPropertyComparator(propertyName);
-		if (comparator != null) {
-			compareUsingPropertyComparator(expected, actual, path, comparator, ctx);
+		PropertyComparator propertyComparator = getPropertyComparator(propertyName);
+		if (propertyComparator != null) {
+			compareUsingPropertyComparator(expected, actual, path, propertyComparator, ctx);
 			return;
 		}
 
 		final Class<? extends Object> klass = expected.getClass();
 		LOG.trace("Check override for type [{}]", klass);
 		for (Entry<Class<?>, PropertyComparator> entry : types.entrySet()) {
-			if (entry.getKey().equals(klass)) {
+			if (entry.getKey().isAssignableFrom(klass)) {
 				compareUsingPropertyComparator(expected, actual, path, entry.getValue(), ctx);
 				return;
 			}
@@ -327,12 +337,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	private PropertyComparator getPropertyComparator(final String propertyName) {
-		for (Entry<String, PropertyComparator> entry : properties.entrySet()) {
-			if (propertyName.equals(entry.getKey())) {
-				return entry.getValue();
-			}
-		}
-		return null;
+		return properties.get(propertyName);
 	}
 
 	private void compareArrays(final Object expected, final Object actual, final String path, final MismatchContext ctx) {
@@ -426,7 +431,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	private void compareUsingPropertyComparator(final Object lhs, final Object rhs, final String path, final PropertyComparator comparator, final MismatchContext ctx) {
-		LOG.debug("Compare path [{}] using comparator [{}]", path, comparator.getClass().getSimpleName());
+		LOG.debug("Compare path [{}] using [{}]", path, comparator.getClass().getSimpleName());
 		try {
 			if (!comparator.matches(lhs, rhs)) {
 				ctx.addMismatch(lhs, rhs, path);
