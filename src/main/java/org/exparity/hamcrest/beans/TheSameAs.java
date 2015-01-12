@@ -27,6 +27,7 @@ import org.exparity.hamcrest.beans.comparators.Excluded;
 import org.exparity.hamcrest.beans.comparators.IsComparable;
 import org.exparity.hamcrest.beans.comparators.IsEquals;
 import org.hamcrest.Description;
+import org.hamcrest.Factory;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,43 @@ import static org.exparity.beans.Type.type;
  * @author Stewart Bissett
  */
 public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
+
+	/**
+	 * Creates a matcher that matches the full object graph for the given instance against another instance
+	 * <p/>
+	 * For example:
+	 * 
+	 * <pre>
+	 * MyObject instance = new MyObject();
+	 * dao.save(instance); // Save instance to persistent store
+	 * assertThat(dao.getById(instance.getId()), theSameAs(instance);
+	 * </pre>
+	 * 
+	 * @param object the instance to match against
+	 */
+	@Factory
+	public static <T> TheSameAs<T> theSameAs(final T object) {
+		return new TheSameAs<T>(object);
+	}
+
+	/**
+	 * Creates a matcher that matches the full object graph for the given instance against another instance
+	 * <p/>
+	 * For example:
+	 * 
+	 * <pre>
+	 * MyObject instance = new MyObject();
+	 * dao.save(instance); // Save instance to persistent store
+	 * assertThat(dao.getById(instance.getId()), theSameAs(instance, "MyInstance");
+	 * </pre>
+	 * 
+	 * @param object the instance to match against
+	 * @param name the name given to the root entity
+	 */
+	@Factory
+	public static <T> TheSameAs<T> theSameAs(final T object, final String name) {
+		return new TheSameAs<T>(object, name);
+	}
 
 	private static final Logger LOG = LoggerFactory.getLogger(TheSameAs.class);
 

@@ -12,7 +12,7 @@ import org.exparity.hamcrest.beans.testutils.types.Tree;
 import org.junit.Test;
 import static java.util.Collections.singletonMap;
 import static org.apache.commons.lang.time.DateUtils.addDays;
-import static org.exparity.hamcrest.beans.BeanMatchers.theSameAs;
+import static org.exparity.hamcrest.BeanMatchers.theSameAs;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
