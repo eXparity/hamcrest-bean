@@ -20,9 +20,9 @@ import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.exparity.beans.ImmutableTypeProperty;
 import org.exparity.beans.Type;
-import org.exparity.beans.naming.CapitalizedNamingStrategy;
+import org.exparity.beans.core.ImmutableTypeProperty;
+import org.exparity.beans.core.naming.CapitalizedNamingStrategy;
 import org.exparity.hamcrest.beans.comparators.Excluded;
 import org.exparity.hamcrest.beans.comparators.IsComparable;
 import org.exparity.hamcrest.beans.comparators.IsEquals;
@@ -356,7 +356,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 			}
 		}
 
-		final Type type = type(klass).setNamingStrategy(new CapitalizedNamingStrategy());
+		final Type type = type(klass, new CapitalizedNamingStrategy());
 		if (type.isArray()) {
 			compareArrays(expected, actual, path, ctx);
 		} else if (type.packageName().startsWith("java.lang")) {

@@ -1,8 +1,8 @@
 
 package org.exparity.hamcrest.beans;
 
-import org.exparity.beans.BeanProperty;
 import org.exparity.beans.Graph;
+import org.exparity.beans.core.BeanProperty;
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
@@ -26,14 +26,14 @@ public class HasPath<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * @param path the path to match
 	 */
 	@Factory
-	public static <T> Matcher<T> hasPath(final String path, final Matcher<T> matcher) {
+	public static <T> Matcher<T> hasPath(final String path, final Matcher<?> matcher) {
 		return new HasPath<T>(path, matcher);
 	}
 
 	private final String path;
-	private final Matcher<T> matcher;
+	private final Matcher<?> matcher;
 
-	public HasPath(final String path, final Matcher<T> matcher) {
+	public HasPath(final String path, final Matcher<?> matcher) {
 		this.path = path;
 		this.matcher = matcher;
 	}
@@ -45,7 +45,7 @@ public class HasPath<T> extends TypeSafeDiagnosingMatcher<T> {
 
 	@Override
 	protected boolean matchesSafely(final T item, final Description mismatchDescription) {
-		BeanProperty property = Graph.graph(item).propertyNamed(path);
+		BeanProperty property = Graph.graph(item).propertyAtPath(path);
 		if (property != null) {
 			if (matcher.matches(property.getValue())) {
 				return true;

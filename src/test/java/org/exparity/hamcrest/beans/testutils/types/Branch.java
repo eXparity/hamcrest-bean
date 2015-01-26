@@ -1,21 +1,22 @@
+
 package org.exparity.hamcrest.beans.testutils.types;
+
+import java.util.List;
 
 public class Branch {
 
 	private boolean dead;
-	private long numOfLeaves;
+	private List<Leaf> leaves;
 
-	public Branch(final boolean dead, final long numOfLeaves) {
+	public Branch(final boolean dead, final List<Leaf> leaves) {
 		this.dead = dead;
-		this.numOfLeaves = numOfLeaves;
+		this.leaves = leaves;
 	}
+
+	public Branch() {}
 
 	public long getNumOfLeaves() {
-		return numOfLeaves;
-	}
-
-	public void setNumOfLeaves(final long numOfLeaves) {
-		this.numOfLeaves = numOfLeaves;
+		return leaves.size();
 	}
 
 	public boolean isDead() {
@@ -24,5 +25,13 @@ public class Branch {
 
 	public void setDead(final boolean dead) {
 		this.dead = dead;
+	}
+
+	public List<Leaf> getLeaves() {
+		return leaves;
+	}
+
+	public void setLeaves(final List<Leaf> leaves) {
+		this.leaves = leaves;
 	}
 }

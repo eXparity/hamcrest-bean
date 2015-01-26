@@ -3,6 +3,7 @@ package org.exparity.hamcrest.beans.testutils.types;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import static org.exparity.dates.en.FluentDate.AUG;
@@ -10,7 +11,7 @@ import static org.exparity.dates.en.FluentDate.AUG;
 public class Tree {
 
 	private List<Branch> branches = new ArrayList<Branch>();
-	private Branch mainBranch = new Branch(false, 100);
+	private Branch mainBranch = new Branch(false, Arrays.asList(new Leaf()));
 	private String name = "Oak";
 	private int age = 1;
 	private long numOfBranches = 20000L;

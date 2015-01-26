@@ -1,8 +1,8 @@
 
 package org.exparity.hamcrest.beans;
 
-import org.exparity.beans.BeanProperty;
 import org.exparity.beans.Graph;
+import org.exparity.beans.core.BeanProperty;
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
@@ -27,14 +27,14 @@ public class HasProperty<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * @param matcher the matcher to match with
 	 */
 	@Factory
-	public static <T> Matcher<T> hasProperty(final String property, final Matcher<T> matcher) {
+	public static <T> Matcher<T> hasProperty(final String property, final Matcher<?> matcher) {
 		return new HasProperty<T>(property, matcher);
 	}
 
 	private final String property;
-	private final Matcher<T> matcher;
+	private final Matcher<?> matcher;
 
-	public HasProperty(final String property, final Matcher<T> matcher) {
+	public HasProperty(final String property, final Matcher<?> matcher) {
 		this.property = property;
 		this.matcher = matcher;
 	}

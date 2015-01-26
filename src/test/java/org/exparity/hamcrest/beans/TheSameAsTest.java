@@ -8,6 +8,7 @@ import java.util.Map;
 import org.exparity.hamcrest.beans.TheSameAs.PropertyComparator;
 import org.exparity.hamcrest.beans.comparators.HasPattern;
 import org.exparity.hamcrest.beans.testutils.types.Branch;
+import org.exparity.hamcrest.beans.testutils.types.Leaf;
 import org.exparity.hamcrest.beans.testutils.types.Tree;
 import org.junit.Test;
 import static java.util.Collections.singletonMap;
@@ -80,6 +81,14 @@ public class TheSameAsTest {
 	@Test(expected = AssertionError.class)
 	public void canDetectStringDifferences() {
 		assertThat("abc", theSameAs("ABC"));
+	}
+
+	@Test
+	public void canCompareListsOfNonComparableObjects() {
+		Tree tree = new Tree(), otherTree = new Tree();
+		tree.addBranches(Arrays.asList(new Branch(false, Arrays.asList(new Leaf()))));
+		otherTree.addBranches(Arrays.asList(new Branch(false, Arrays.asList(new Leaf()))));
+		assertThat(tree, theSameAs(otherTree));
 	}
 
 	@Test
@@ -224,23 +233,23 @@ public class TheSameAsTest {
 	@Test(expected = AssertionError.class)
 	public void canDetectDifferentPropertyListSizes() {
 		Tree reference = new Tree(), sample = new Tree();
-		sample.addBranches(Arrays.asList(new Branch(true, 0)));
+		sample.addBranches(Arrays.asList(new Branch(true, Arrays.asList(new Leaf()))));
 		assertThat(sample, theSameAs(reference));
 	}
 
 	@Test(expected = AssertionError.class)
 	public void canDetectDifferentPropertyListItems() {
 		Tree reference = new Tree(), sample = new Tree();
-		reference.addBranches(Arrays.asList(new Branch(false, 1234)));
-		sample.addBranches(Arrays.asList(new Branch(true, 0)));
+		reference.addBranches(Arrays.asList(new Branch(false, Arrays.asList(new Leaf()))));
+		sample.addBranches(Arrays.asList(new Branch(true, Arrays.asList(new Leaf()))));
 		assertThat(sample, theSameAs(reference));
 	}
 
 	@Test
 	public void canExcludeType() {
 		Tree reference = new Tree(), sample = new Tree();
-		reference.addBranches(Arrays.asList(new Branch(false, 1234)));
-		sample.addBranches(Arrays.asList(new Branch(true, 0)));
+		reference.addBranches(Arrays.asList(new Branch(false, Arrays.asList(new Leaf()))));
+		sample.addBranches(Arrays.asList(new Branch(true, Arrays.asList(new Leaf()))));
 		assertThat(sample, theSameAs(reference).excludeType(Branch.class));
 	}
 
@@ -296,9 +305,9 @@ public class TheSameAsTest {
 	@Test
 	public void canOverrideTypeComparator() {
 		Tree reference = new Tree();
-		reference.setMainBranch(new Branch(true, 1000));
+		reference.setMainBranch(new Branch(true, Arrays.asList(new Leaf())));
 		Tree sample = new Tree();
-		sample.setMainBranch(new Branch(false, 0));
+		sample.setMainBranch(new Branch(false, Arrays.asList(new Leaf())));
 		assertThat(sample, theSameAs(reference).compareType(Branch.class, new PropertyComparator() {
 
 			@Override

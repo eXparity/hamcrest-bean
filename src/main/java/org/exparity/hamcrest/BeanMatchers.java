@@ -98,8 +98,8 @@ public abstract class BeanMatchers {
 	 * @param <T> the type of the instance
 	 * @return an instance of a Matcher
 	 */
-	public static <T> Matcher<T> hasProperty(final String name, final Matcher<T> matcher) {
-		return HasProperty.hasProperty(name, matcher);
+	public static <T> Matcher<T> hasProperty(final String name, final Matcher<?> matcher) {
+		return HasProperty.<T> hasProperty(name, matcher);
 	}
 
 	/**
@@ -126,7 +126,7 @@ public abstract class BeanMatchers {
 	 * @param <T> the type of the instance
 	 * @return an instance of a Matcher
 	 */
-	public static <T> Matcher<T> hasPath(final String name, final Matcher<T> matcher) {
-		return HasPath.hasPath(name, matcher);
+	public static <T> Matcher<T> hasPath(final String name, final Matcher<?> matcher) {
+		return HasPath.<T> hasPath(name, matcher);
 	}
 }
