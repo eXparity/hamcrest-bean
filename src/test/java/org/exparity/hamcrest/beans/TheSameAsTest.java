@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 import org.exparity.hamcrest.beans.TheSameAs.PropertyComparator;
 import org.exparity.hamcrest.beans.comparators.HasPattern;
-import org.exparity.hamcrest.beans.testutils.types.Branch;
-import org.exparity.hamcrest.beans.testutils.types.Leaf;
-import org.exparity.hamcrest.beans.testutils.types.Tree;
+import org.exparity.hamcrest.beans.testutils.types.SimpleTypeWithList;
+import org.exparity.hamcrest.beans.testutils.types.SimpleType;
+import org.exparity.hamcrest.beans.testutils.types.ObjectWithAllTypes;
 import org.junit.Test;
 import static java.util.Collections.singletonMap;
 import static org.apache.commons.lang.time.DateUtils.addDays;
@@ -29,7 +29,7 @@ public class TheSameAsTest {
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectBooleanDifferences() {
+	public void canCompareDifferentBooleans() {
 		assertThat(true, theSameAs(false));
 	}
 
@@ -39,7 +39,7 @@ public class TheSameAsTest {
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectIntegerDifferences() {
+	public void canCompareDifferentIntegers() {
 		assertThat(1, theSameAs(2));
 	}
 
@@ -49,7 +49,7 @@ public class TheSameAsTest {
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectLongDifferences() {
+	public void canCompareDifferentLongs() {
 		assertThat(1L, theSameAs(2L));
 	}
 
@@ -59,7 +59,7 @@ public class TheSameAsTest {
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectDoubleDifferences() {
+	public void canCompareDifferentDoubles() {
 		assertThat(1.23401, theSameAs(1.23402));
 	}
 
@@ -69,7 +69,7 @@ public class TheSameAsTest {
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectFloatDifferences() {
+	public void canCompareDifferentFloats() {
 		assertThat(1.23401f, theSameAs(1.23402f));
 	}
 
@@ -79,15 +79,15 @@ public class TheSameAsTest {
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectStringDifferences() {
+	public void canCompareDifferentStrings() {
 		assertThat("abc", theSameAs("ABC"));
 	}
 
 	@Test
 	public void canCompareListsOfNonComparableObjects() {
-		Tree tree = new Tree(), otherTree = new Tree();
-		tree.addBranches(Arrays.asList(new Branch(false, Arrays.asList(new Leaf()))));
-		otherTree.addBranches(Arrays.asList(new Branch(false, Arrays.asList(new Leaf()))));
+		ObjectWithAllTypes tree = new ObjectWithAllTypes(), otherTree = new ObjectWithAllTypes();
+		tree.addObject(Arrays.asList(new SimpleTypeWithList(false, Arrays.asList(new SimpleType("A"), new SimpleType("B")))));
+		otherTree.addObject(Arrays.asList(new SimpleTypeWithList(false, Arrays.asList(new SimpleType("B"), new SimpleType("A")))));
 		assertThat(tree, theSameAs(otherTree));
 	}
 
@@ -110,7 +110,7 @@ public class TheSameAsTest {
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectArraySizeDifferences() {
+	public void canCompareDifferentArraySizes() {
 		assertThat(new String[] {
 				"abc", "xyz"
 		}, theSameAs(new String[] {
@@ -119,7 +119,7 @@ public class TheSameAsTest {
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectContentDifferencesInStringArrays() {
+	public void canCompareDifferentStringArrays() {
 		assertThat(new String[] {
 				"abc", "xyz"
 		}, theSameAs(new String[] {
@@ -128,7 +128,7 @@ public class TheSameAsTest {
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectContentDifferencesInByteArrays() {
+	public void canCompareDifferentByteArrays() {
 		assertThat(new byte[] {
 				0x01, 0x02
 		}, theSameAs(new byte[] {
@@ -137,178 +137,196 @@ public class TheSameAsTest {
 	}
 
 	@Test
+	public void canCompareObjectArrays() {
+		assertThat(new SimpleType[] {
+				new SimpleType("A"), new SimpleType("B")
+		}, theSameAs(new SimpleType[] {
+				new SimpleType("A"), new SimpleType("B")
+		}));
+	}
+
+	@Test(expected = AssertionError.class)
+	public void canCompareDifferentObjectArrays() {
+		assertThat(new SimpleType[] {
+				new SimpleType("A"), new SimpleType("B")
+		}, theSameAs(new SimpleType[] {
+				new SimpleType("A"), new SimpleType("C")
+		}));
+	}
+
+	@Test
 	public void canCompareMaps() {
-		Map<String, Tree> referenceMapOfTrees = singletonMap("Oak", new Tree());
-		Map<String, Tree> sampleMapOfTrees = singletonMap("Oak", new Tree());
+		Map<String, ObjectWithAllTypes> referenceMapOfTrees = singletonMap("Oak", new ObjectWithAllTypes());
+		Map<String, ObjectWithAllTypes> sampleMapOfTrees = singletonMap("Oak", new ObjectWithAllTypes());
 		assertThat(sampleMapOfTrees, theSameAs(referenceMapOfTrees));
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectDifferentMapSizes() {
-		Map<String, Tree> referenceMapOfTrees = singletonMap("Oak", new Tree());
-		Map<String, Tree> sampleMapOfTrees = new HashMap<String, Tree>();
+	public void canCompareDifferentMapSizes() {
+		Map<String, ObjectWithAllTypes> referenceMapOfTrees = singletonMap("Oak", new ObjectWithAllTypes());
+		Map<String, ObjectWithAllTypes> sampleMapOfTrees = new HashMap<String, ObjectWithAllTypes>();
 		assertThat(sampleMapOfTrees, theSameAs(referenceMapOfTrees));
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectDifferentMapKeys() {
-		Tree reference = new Tree();
-		Map<String, Tree> referenceMapOfTrees = singletonMap(reference.getName(), reference);
-		Map<String, Tree> sampleMapOfTrees = singletonMap("Birch", reference);
+	public void canCompareDifferentMapKeys() {
+		ObjectWithAllTypes reference = new ObjectWithAllTypes();
+		Map<String, ObjectWithAllTypes> referenceMapOfTrees = singletonMap(reference.getStringValue(), reference);
+		Map<String, ObjectWithAllTypes> sampleMapOfTrees = singletonMap("Birch", reference);
 		assertThat(sampleMapOfTrees, theSameAs(referenceMapOfTrees));
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectDifferentMapEntries() {
-		Tree reference = new Tree();
-		Tree sample = new Tree();
-		sample.setAge(reference.getAge() + 1);
-		Map<String, Tree> referenceMapOfTrees = singletonMap(reference.getName(), reference);
-		Map<String, Tree> sampleMapOfTrees = singletonMap(sample.getName(), sample);
+	public void canCompareDifferentMapEntries() {
+		ObjectWithAllTypes reference = new ObjectWithAllTypes();
+		ObjectWithAllTypes sample = new ObjectWithAllTypes();
+		sample.setIntValue(reference.getIntValue() + 1);
+		Map<String, ObjectWithAllTypes> referenceMapOfTrees = singletonMap(reference.getStringValue(), reference);
+		Map<String, ObjectWithAllTypes> sampleMapOfTrees = singletonMap(sample.getStringValue(), sample);
 		assertThat(sampleMapOfTrees, theSameAs(referenceMapOfTrees));
 	}
 
 	@Test
-	public void canConfirmNoPropertyDifferences() {
-		Tree reference = new Tree(), sample = new Tree();
+	public void canConfirmNoProperties() {
+		ObjectWithAllTypes reference = new ObjectWithAllTypes(), sample = new ObjectWithAllTypes();
 		assertThat(sample, theSameAs(reference));
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectBooleanPropertyDifferences() {
-		Tree reference = new Tree(), sample = new Tree();
-		sample.setDeciduous(false);
+	public void canCompareDifferentBooleanProperties() {
+		ObjectWithAllTypes reference = new ObjectWithAllTypes(), sample = new ObjectWithAllTypes();
+		sample.setBooleanValue(false);
 		assertThat(sample, theSameAs(reference));
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectStringPropertyDifferences() {
-		Tree reference = new Tree(), sample = new Tree();
-		sample.setName("Ddssd");
+	public void canCompareDifferentStringProperties() {
+		ObjectWithAllTypes reference = new ObjectWithAllTypes(), sample = new ObjectWithAllTypes();
+		sample.setStringValue("Ddssd");
 		assertThat(sample, theSameAs(reference));
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectDatePropertyDifferences() {
-		Tree reference = new Tree(), sample = new Tree();
-		sample.setGerminationDate(addDays(reference.getGerminationDate(), 100));
+	public void canCompareDifferentDateProperties() {
+		ObjectWithAllTypes reference = new ObjectWithAllTypes(), sample = new ObjectWithAllTypes();
+		sample.setDateValue(addDays(reference.getDateValue(), 100));
 		assertThat(sample, theSameAs(reference));
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectIntegerPropertyDifferences() {
-		Tree reference = new Tree(), sample = new Tree();
-		sample.setAge(reference.getAge() + 1);
+	public void canCompareDifferentIntegerProperties() {
+		ObjectWithAllTypes reference = new ObjectWithAllTypes(), sample = new ObjectWithAllTypes();
+		sample.setIntValue(reference.getIntValue() + 1);
 		assertThat(sample, theSameAs(reference));
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectDoublePropertyDifferences() {
-		Tree reference = new Tree(), sample = new Tree();
-		sample.setWeight(reference.getWeight() + 1);
+	public void canCompareDifferentDoubleProperties() {
+		ObjectWithAllTypes reference = new ObjectWithAllTypes(), sample = new ObjectWithAllTypes();
+		sample.setDoubleValue(reference.getDoubleValue() + 1);
 		assertThat(sample, theSameAs(reference));
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectFloatPropertyDifferences() {
-		Tree reference = new Tree(), sample = new Tree();
-		sample.setGirth(reference.getGirth() + 1);
+	public void canCompareDifferentFloatProperties() {
+		ObjectWithAllTypes reference = new ObjectWithAllTypes(), sample = new ObjectWithAllTypes();
+		sample.setFloatValue(reference.getFloatValue() + 1);
 		assertThat(sample, theSameAs(reference));
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectLongPropertyDifferences() {
-		Tree reference = new Tree(), sample = new Tree();
-		sample.setNumOfBranches(reference.getNumOfBranches() + 1);
+	public void canCompareDifferentLongProperties() {
+		ObjectWithAllTypes reference = new ObjectWithAllTypes(), sample = new ObjectWithAllTypes();
+		sample.setLongValue(reference.getLongValue() + 1);
 		assertThat(sample, theSameAs(reference));
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectBigDecimalPropertyDifferences() {
-		Tree reference = new Tree(), sample = new Tree();
-		sample.setHeight(reference.getHeight().add(new BigDecimal(1.1)));
+	public void canCompareDifferentBigDecimalProperties() {
+		ObjectWithAllTypes reference = new ObjectWithAllTypes(), sample = new ObjectWithAllTypes();
+		sample.setDecimalValue(reference.getDecimalValue().add(new BigDecimal(1.1)));
 		assertThat(sample, theSameAs(reference));
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectDifferentPropertyListSizes() {
-		Tree reference = new Tree(), sample = new Tree();
-		sample.addBranches(Arrays.asList(new Branch(true, Arrays.asList(new Leaf()))));
+	public void canCompareDifferentPropertyListSizes() {
+		ObjectWithAllTypes reference = new ObjectWithAllTypes(), sample = new ObjectWithAllTypes();
+		sample.addObject(Arrays.asList(new SimpleTypeWithList(true, Arrays.asList(new SimpleType()))));
 		assertThat(sample, theSameAs(reference));
 	}
 
 	@Test(expected = AssertionError.class)
-	public void canDetectDifferentPropertyListItems() {
-		Tree reference = new Tree(), sample = new Tree();
-		reference.addBranches(Arrays.asList(new Branch(false, Arrays.asList(new Leaf()))));
-		sample.addBranches(Arrays.asList(new Branch(true, Arrays.asList(new Leaf()))));
+	public void canCompareDifferentPropertyListItems() {
+		ObjectWithAllTypes reference = new ObjectWithAllTypes(), sample = new ObjectWithAllTypes();
+		reference.addObject(Arrays.asList(new SimpleTypeWithList(false, Arrays.asList(new SimpleType()))));
+		sample.addObject(Arrays.asList(new SimpleTypeWithList(true, Arrays.asList(new SimpleType()))));
 		assertThat(sample, theSameAs(reference));
 	}
 
 	@Test
 	public void canExcludeType() {
-		Tree reference = new Tree(), sample = new Tree();
-		reference.addBranches(Arrays.asList(new Branch(false, Arrays.asList(new Leaf()))));
-		sample.addBranches(Arrays.asList(new Branch(true, Arrays.asList(new Leaf()))));
-		assertThat(sample, theSameAs(reference).excludeType(Branch.class));
+		ObjectWithAllTypes reference = new ObjectWithAllTypes(), sample = new ObjectWithAllTypes();
+		reference.addObject(Arrays.asList(new SimpleTypeWithList(false, Arrays.asList(new SimpleType()))));
+		sample.addObject(Arrays.asList(new SimpleTypeWithList(true, Arrays.asList(new SimpleType()))));
+		assertThat(sample, theSameAs(reference).excludeType(SimpleTypeWithList.class));
 	}
 
 	@Test
 	public void canExcludePath() {
-		Tree reference = new Tree();
-		reference.setName("Oak");
-		reference.setAge(1);
-		Tree sample = new Tree();
-		sample.setName("Oak");
-		sample.setAge(2);
-		assertThat(sample, theSameAs(reference).excludePath("Tree.Age"));
+		ObjectWithAllTypes reference = new ObjectWithAllTypes();
+		reference.setStringValue("Oak");
+		reference.setIntValue(1);
+		ObjectWithAllTypes sample = new ObjectWithAllTypes();
+		sample.setStringValue("Oak");
+		sample.setIntValue(2);
+		assertThat(sample, theSameAs(reference).excludePath("ObjectWithAllTypes.IntValue"));
 	}
 
 	@Test
 	public void canExcludeProperty() {
-		Tree reference = new Tree();
-		reference.setName("Oak");
-		reference.setAge(1);
-		Tree sample = new Tree();
-		sample.setName("Oak");
-		sample.setAge(2);
-		assertThat(sample, theSameAs(reference).excludeProperty("Age"));
+		ObjectWithAllTypes reference = new ObjectWithAllTypes();
+		reference.setStringValue("Oak");
+		reference.setIntValue(1);
+		ObjectWithAllTypes sample = new ObjectWithAllTypes();
+		sample.setStringValue("Oak");
+		sample.setIntValue(2);
+		assertThat(sample, theSameAs(reference).excludeProperty("IntValue"));
 	}
 
 	@Test
 	public void canOverridePathComparator() {
-		Tree reference = new Tree();
-		reference.setName("Oak");
-		Tree sample = new Tree();
-		sample.setName("Olive");
-		assertThat(sample, theSameAs(reference).comparePath("Tree.Name", new HasPattern("O.*")));
+		ObjectWithAllTypes reference = new ObjectWithAllTypes();
+		reference.setStringValue("Oak");
+		ObjectWithAllTypes sample = new ObjectWithAllTypes();
+		sample.setStringValue("Olive");
+		assertThat(sample, theSameAs(reference).comparePath("ObjectWithAllTypes.StringValue", new HasPattern("O.*")));
 	}
 
 	@Test
 	public void canOverridePropertyComparator() {
-		Tree reference = new Tree();
-		reference.setName("Oak");
-		Tree sample = new Tree();
-		sample.setName("Olive");
-		assertThat(sample, theSameAs(reference).compareProperty("Name", new HasPattern("O.*")));
+		ObjectWithAllTypes reference = new ObjectWithAllTypes();
+		reference.setStringValue("Oak");
+		ObjectWithAllTypes sample = new ObjectWithAllTypes();
+		sample.setStringValue("Olive");
+		assertThat(sample, theSameAs(reference).compareProperty("StringValue", new HasPattern("O.*")));
 	}
 
 	@Test
 	public void canOverrideTypeComparatorLangType() {
-		Tree reference = new Tree();
-		reference.setName("Oak");
-		Tree sample = new Tree();
-		sample.setName("Olive");
+		ObjectWithAllTypes reference = new ObjectWithAllTypes();
+		reference.setStringValue("Oak");
+		ObjectWithAllTypes sample = new ObjectWithAllTypes();
+		sample.setStringValue("Olive");
 		assertThat(sample, theSameAs(reference).compareType(String.class, new HasPattern("O.*")));
 	}
 
 	@Test
 	public void canOverrideTypeComparator() {
-		Tree reference = new Tree();
-		reference.setMainBranch(new Branch(true, Arrays.asList(new Leaf())));
-		Tree sample = new Tree();
-		sample.setMainBranch(new Branch(false, Arrays.asList(new Leaf())));
-		assertThat(sample, theSameAs(reference).compareType(Branch.class, new PropertyComparator() {
+		ObjectWithAllTypes reference = new ObjectWithAllTypes();
+		reference.setObject(new SimpleTypeWithList(true, Arrays.asList(new SimpleType())));
+		ObjectWithAllTypes sample = new ObjectWithAllTypes();
+		sample.setObject(new SimpleTypeWithList(false, Arrays.asList(new SimpleType())));
+		assertThat(sample, theSameAs(reference).compareType(SimpleTypeWithList.class, new PropertyComparator() {
 
 			@Override
 			public boolean matches(final Object lhs, final Object rhs) {

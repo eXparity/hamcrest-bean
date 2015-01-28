@@ -1,7 +1,7 @@
 
 package org.exparity.hamcrest.beans;
 
-import org.exparity.hamcrest.beans.testutils.types.Tree;
+import org.exparity.hamcrest.beans.testutils.types.ObjectWithAllTypes;
 import org.junit.Test;
 import static org.exparity.hamcrest.BeanMatchers.hasProperty;
 import static org.exparity.stub.random.RandomBuilder.aRandomInstanceOf;
@@ -20,15 +20,15 @@ public class HasPropertyTest {
 	@Test
 	public void canTestPathWithValue() {
 		String expectedValue = aRandomString();
-		Tree tree = aRandomInstanceOf(Tree.class, path("Tree.Name", expectedValue));
-		assertThat(tree, hasProperty("Name", equalTo(expectedValue)));
+		ObjectWithAllTypes tree = aRandomInstanceOf(ObjectWithAllTypes.class, path("ObjectWithAllTypes.StringValue", expectedValue));
+		assertThat(tree, hasProperty("StringValue", equalTo(expectedValue)));
 	}
 
 	@Test(expected = AssertionError.class)
 	public void canTestPathWithWrongValue() {
 		String expectedValue = aRandomString(), wrongValue = expectedValue + expectedValue;
-		Tree tree = aRandomInstanceOf(Tree.class, path("Tree.Name", expectedValue));
-		assertThat(tree, hasProperty("Name", equalTo(wrongValue)));
+		ObjectWithAllTypes tree = aRandomInstanceOf(ObjectWithAllTypes.class, path("ObjectWithAllTypes.StringValue", expectedValue));
+		assertThat(tree, hasProperty("StringValue", equalTo(wrongValue)));
 	}
 
 }
