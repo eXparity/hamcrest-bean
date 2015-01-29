@@ -24,10 +24,12 @@ import org.exparity.beans.Type;
 import org.exparity.beans.core.ImmutableTypeProperty;
 import org.exparity.beans.core.naming.CapitalizedNamingStrategy;
 import org.exparity.hamcrest.beans.comparators.Excluded;
+import org.exparity.hamcrest.beans.comparators.HamcrestComparator;
 import org.exparity.hamcrest.beans.comparators.IsComparable;
 import org.exparity.hamcrest.beans.comparators.IsEquals;
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
+import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -290,6 +292,89 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 */
 	public <P> TheSameAs<T> compareType(final Class<P> type, final PropertyComparator<P> comparator) {
 		this.types.put(type, comparator);
+		return this;
+	}
+
+	/**
+	 * Override the PropertyComparator used for a path to use a hamcrest Matcher. For example</p>
+	 * 
+	 * <pre>
+	 * class Person [
+	 *   private String firstName, lastName;
+	 *   public Person(final String firstName, final String lastName) {
+	 *     this.firstname = firstName;
+	 *     this.lastName = lastName;
+	 *    }
+	 *    public String getFirstName() { return firstName;};
+	 *    public String getLastName() { return lastName;};
+	 * }
+	 * 
+	 * // Testing a simple object is the same except for a property
+	 * Person expected = new Person("John", "Doe");
+	 * MatcherAssert.assertThat(new Person("John", "Deer"), BeanMatchers.theSameAs(expected).comparePath("Person.LastName", Matchers.startsWith("D")));
+	 * </pre>
+	 * 
+	 * @param property the property to exclude from the comparison e.g LastName
+	 * @return the current matcher
+	 */
+	public <P> TheSameAs<T> comparePath(final String path, final Matcher<P> matcher) {
+		this.paths.put(path.toLowerCase(), new HamcrestComparator<P>(matcher));
+		return this;
+	}
+
+	/**
+	 * Override the PropertyComparator used for a property to use a hamcrest matcher. For example</p>
+	 * 
+	 * <pre>
+	 * class Person [
+	 *   private String firstName, lastName;
+	 *   public Person(final String firstName, final String lastName) {
+	 *     this.firstname = firstName;
+	 *     this.lastName = lastName;
+	 *    }
+	 *    public String getFirstName() { return firstName;};
+	 *    public String getLastName() { return lastName;};
+	 * }
+	 * 
+	 * // Testing a simple object is the same except for a property
+	 * Person expected = new Person("John", "Doe");
+	 * MatcherAssert.assertThat(new Person("John", "Deer"), BeanMatchers.theSameAs(expected).comparePath("Person.LastName", Matchers.startsWith("D")));
+	 * </pre>
+	 * 
+	 * @param path the path to set the comparator for
+	 * @param matcher the matcher to use
+	 * @return the current matcher
+	 */
+	public <P> TheSameAs<T> compareProperty(final String path, final Matcher<P> matcher) {
+		this.properties.put(path.toLowerCase(), new HamcrestComparator<P>(matcher));
+		return this;
+	}
+
+	/**
+	 * Override the PropertyComparator used for a type to use a hamcrest Matcher. For example</p>
+	 * 
+	 * <pre>
+	 * class Person [
+	 *   private String firstName, lastName;
+	 *   public Person(final String firstName, final String lastName) {
+	 *     this.firstname = firstName;
+	 *     this.lastName = lastName;
+	 *    }
+	 *    public String getFirstName() { return firstName;};
+	 *    public String getLastName() { return lastName;};
+	 * }
+	 * 
+	 * // Testing a simple object is the same except for a property
+	 * Person expected = new Person("John", "Doe");
+	 * MatcherAssert.assertThat(new Person("John", "Doe"), BeanMatchers.theSameAs(expected).compareType(String.class, Matchers.startsWith("J")));
+	 * </pre>
+	 * 
+	 * @param type the type to set the comparator for
+	 * @param matcher the matcher to use
+	 * @return the current matcher
+	 */
+	public <P> TheSameAs<T> compareType(final Class<P> type, final Matcher<P> matcher) {
+		this.types.put(type, new HamcrestComparator<P>(matcher));
 		return this;
 	}
 

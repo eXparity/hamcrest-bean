@@ -109,7 +109,7 @@ The source includes a pom.xml for building with Maven
 
 Release Notes
 -------------
-Changes 1.0.3 -> 1.10.4
+Changes 1.0.3 -> 1.0.4
   * Stronly type PropertyComparator
 
 

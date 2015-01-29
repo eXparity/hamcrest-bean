@@ -16,6 +16,7 @@ import static org.apache.commons.lang.time.DateUtils.addDays;
 import static org.exparity.hamcrest.BeanMatchers.theSameAs;
 import static org.exparity.stub.random.RandomBuilder.aRandomString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.startsWith;
 
 /**
  * Unit Test for {@link TheSameAs}
@@ -336,6 +337,33 @@ public class TheSameAsTest {
 		}));
 	}
 
+	@Test
+	public void canOverridePathComparatorWithMatcher() {
+		ObjectWithAllTypes reference = new ObjectWithAllTypes();
+		reference.setStringValue("Oak");
+		ObjectWithAllTypes sample = new ObjectWithAllTypes();
+		sample.setStringValue("Olive");
+		assertThat(sample, theSameAs(reference).comparePath("ObjectWithAllTypes.StringValue", startsWith("O")));
+	}
+
+	@Test
+	public void canOverridePropertyComparatorWithMatcher() {
+		ObjectWithAllTypes reference = new ObjectWithAllTypes();
+		reference.setStringValue("Oak");
+		ObjectWithAllTypes sample = new ObjectWithAllTypes();
+		sample.setStringValue("Olive");
+		assertThat(sample, theSameAs(reference).compareProperty("StringValue", startsWith("O")));
+	}
+
+	@Test
+	public void canOverrideTypeComparatorWithMatcher() {
+		ObjectWithAllTypes reference = new ObjectWithAllTypes();
+		reference.setStringValue("Oak");
+		ObjectWithAllTypes sample = new ObjectWithAllTypes();
+		sample.setStringValue("Olive");
+		assertThat(sample, theSameAs(reference).compareType(String.class, startsWith("O")));
+	}
+
 	@Test(expected = AssertionError.class)
 	public void canCompareNullVsExisting() {
 		ObjectWithAllTypes reference = new ObjectWithAllTypes();
@@ -406,6 +434,11 @@ public class TheSameAsTest {
 		ObjectWithAllTypes sample = new ObjectWithAllTypes();
 		sample.setStringValue(null);
 		assertThat(sample, theSameAs(reference).excludeType(String.class));
+	}
+
+	@Test
+	public void canOverridePathToUseMatcher() {
+
 	}
 
 }
