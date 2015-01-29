@@ -321,6 +321,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 			} else {
 				ctx.addComparedPair(expected, actual);
 			}
+		} else if (expected == null && actual == null) {
+			return;
 		}
 
 		LOG.trace("Check override for path [{}]", pathNoIndexes);
@@ -337,14 +339,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 			return;
 		}
 
-		if (expected == null) {
-			if (actual != null) {
-				ctx.addMismatch(expected, actual, path);
-			}
-			return;
-		}
-
-		final Class<? extends Object> klass = expected.getClass();
+		final Class<? extends Object> klass = expected != null ? expected.getClass() : actual.getClass();
 		LOG.trace("Check override for type [{}]", klass);
 		for (Entry<Class<?>, PropertyComparator<?>> entry : types.entrySet()) {
 			if (entry.getKey().isAssignableFrom(klass)) {

@@ -363,8 +363,7 @@ public class TheSameAsTest {
 		assertThat(sample, theSameAs(reference).excludePath("ObjectWithAllTypes.StringValue"));
 	}
 
-	// Disabled temporarily to push fix for path check
-	// @Test
+	@Test
 	public void canExcludeNullTypeVsExisting() {
 		ObjectWithAllTypes reference = new ObjectWithAllTypes();
 		reference.setStringValue(null);
