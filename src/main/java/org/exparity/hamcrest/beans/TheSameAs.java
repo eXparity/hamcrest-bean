@@ -314,23 +314,13 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		String pathNoIndexes = path.replaceAll("\\[\\w*\\]\\.", ".").toLowerCase();
 		String propertyName = StringUtils.contains(path, ".") ? substringAfterLast(pathNoIndexes, ".") : pathNoIndexes;
 
-		if (expected == null) {
-			if (actual != null) {
-				ctx.addMismatch(expected, actual, path);
-			}
-			return;
-		} else {
-			if (actual == null) {
-				ctx.addMismatch(expected, actual, path);
+		if (expected != null && actual != null) {
+			if (ctx.hasComparedPair(expected, actual)) {
+				LOG.trace("Already compared [{}] vs [{}]", expected, actual);
 				return;
+			} else {
+				ctx.addComparedPair(expected, actual);
 			}
-		}
-
-		if (ctx.hasComparedPair(expected, actual)) {
-			LOG.trace("Already compared [{}] vs [{}]", expected, actual);
-			return;
-		} else {
-			ctx.addComparedPair(expected, actual);
 		}
 
 		LOG.trace("Check override for path [{}]", pathNoIndexes);
@@ -344,6 +334,13 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		PropertyComparator propertyComparator = getPropertyComparator(propertyName);
 		if (propertyComparator != null) {
 			compareUsingPropertyComparator(expected, actual, path, propertyComparator, ctx);
+			return;
+		}
+
+		if (expected == null) {
+			if (actual != null) {
+				ctx.addMismatch(expected, actual, path);
+			}
 			return;
 		}
 

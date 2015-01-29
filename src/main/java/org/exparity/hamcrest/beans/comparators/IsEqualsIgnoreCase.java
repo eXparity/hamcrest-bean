@@ -11,7 +11,7 @@ import org.exparity.hamcrest.beans.TheSameAs.PropertyComparator;
 public class IsEqualsIgnoreCase implements PropertyComparator {
 
 	public boolean matches(final Object lhs, final Object rhs) {
-		return lhs instanceof String && rhs instanceof String && ((String) lhs).equalsIgnoreCase((String) rhs);
+		return lhs == null ? rhs == null : lhs instanceof String && rhs instanceof String && ((String) lhs).equalsIgnoreCase((String) rhs);
 	}
 
 }

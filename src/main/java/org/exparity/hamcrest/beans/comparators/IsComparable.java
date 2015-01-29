@@ -14,7 +14,13 @@ public class IsComparable implements PropertyComparator {
 			"unchecked", "rawtypes"
 	})
 	public boolean matches(final Object lhs, final Object rhs) {
-		return lhs instanceof Comparable && rhs instanceof Comparable && ((Comparable) lhs).compareTo(rhs) == 0;
+		if (lhs == null && rhs == null) {
+			return true;
+		} else if (lhs instanceof Comparable && rhs instanceof Comparable) {
+			return lhs instanceof Comparable && rhs instanceof Comparable && ((Comparable) lhs).compareTo(rhs) == 0;
+		} else {
+			throw new IllegalArgumentException("Type " + lhs.getClass().getName() + " must implement Comparable");
+		}
 	}
 
 }

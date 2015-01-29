@@ -17,7 +17,7 @@ public class HasPattern implements PropertyComparator {
 	}
 
 	public boolean matches(final Object lhs, final Object rhs) {
-		return rhs instanceof String && ((String) rhs).matches(regex);
+		return lhs == null ? rhs == null : rhs instanceof String && ((String) rhs).matches(regex);
 	}
 
 }
