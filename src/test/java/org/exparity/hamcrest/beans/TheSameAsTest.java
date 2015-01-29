@@ -7,10 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 import org.exparity.hamcrest.beans.TheSameAs.PropertyComparator;
 import org.exparity.hamcrest.beans.comparators.HasPattern;
-import org.exparity.hamcrest.beans.testutils.types.SimpleTypeWithList;
-import org.exparity.hamcrest.beans.testutils.types.SimpleType;
 import org.exparity.hamcrest.beans.testutils.types.ObjectWithAllTypes;
-import org.exparity.stub.random.RandomBuilder;
+import org.exparity.hamcrest.beans.testutils.types.SimpleType;
+import org.exparity.hamcrest.beans.testutils.types.SimpleTypeWithList;
 import org.junit.Test;
 import static java.util.Collections.singletonMap;
 import static org.apache.commons.lang.time.DateUtils.addDays;
@@ -328,10 +327,10 @@ public class TheSameAsTest {
 		reference.setObject(new SimpleTypeWithList(true, Arrays.asList(new SimpleType())));
 		ObjectWithAllTypes sample = new ObjectWithAllTypes();
 		sample.setObject(new SimpleTypeWithList(false, Arrays.asList(new SimpleType())));
-		assertThat(sample, theSameAs(reference).compareType(SimpleTypeWithList.class, new PropertyComparator() {
+		assertThat(sample, theSameAs(reference).compareType(SimpleTypeWithList.class, new PropertyComparator<SimpleTypeWithList>() {
 
 			@Override
-			public boolean matches(final Object lhs, final Object rhs) {
+			public boolean matches(final SimpleTypeWithList lhs, final SimpleTypeWithList rhs) {
 				return true;
 			}
 		}));

@@ -88,12 +88,12 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	/**
 	 * Interface to be implemented by classes which can compare two property values to confirm if they're equivalent
 	 */
-	public interface PropertyComparator {
+	public interface PropertyComparator<T> {
 
 		/**
 		 * Return <code>true</code> if the actual value matches the expected value
 		 */
-		public boolean matches(final Object lhs, final Object rhs);
+		public boolean matches(final T lhs, final T rhs);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -104,9 +104,9 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		}
 	};
 
-	private final Map<String, PropertyComparator> paths = new HashMap<String, PropertyComparator>();
-	private final Map<String, PropertyComparator> properties = new HashMap<String, PropertyComparator>();
-	private final Map<Class<?>, PropertyComparator> types = new HashMap<Class<?>, PropertyComparator>();
+	private final Map<String, PropertyComparator<?>> paths = new HashMap<>();
+	private final Map<String, PropertyComparator<?>> properties = new HashMap<>();
+	private final Map<Class<?>, PropertyComparator<?>> types = new HashMap<>();
 
 	private final T object;
 	private final String name;
@@ -116,15 +116,15 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	public TheSameAs(final T object, final String name) {
-		this.types.put(BigDecimal.class, new IsComparable());
-		this.types.put(String.class, new IsEquals());
-		this.types.put(Integer.class, new IsEquals());
-		this.types.put(Long.class, new IsEquals());
-		this.types.put(Double.class, new IsEquals());
-		this.types.put(Float.class, new IsEquals());
-		this.types.put(Character.class, new IsEquals());
-		this.types.put(Date.class, new IsComparable());
-		this.types.put(Class.class, new Excluded());
+		this.types.put(BigDecimal.class, new IsComparable<BigDecimal>());
+		this.types.put(String.class, new IsEquals<String>());
+		this.types.put(Integer.class, new IsEquals<Integer>());
+		this.types.put(Long.class, new IsEquals<Long>());
+		this.types.put(Double.class, new IsEquals<Double>());
+		this.types.put(Float.class, new IsEquals<Float>());
+		this.types.put(Character.class, new IsEquals<Character>());
+		this.types.put(Date.class, new IsComparable<Date>());
+		this.types.put(Class.class, new Excluded<Class<?>>());
 		this.object = object;
 		this.name = name;
 	}
@@ -152,7 +152,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * @return the current matcher
 	 */
 	public TheSameAs<T> excludePath(final String path) {
-		this.paths.put(path.toLowerCase(), new Excluded());
+		this.paths.put(path.toLowerCase(), new Excluded<Object>());
 		return this;
 	}
 
@@ -179,7 +179,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * @return the current matcher
 	 */
 	public TheSameAs<T> excludeProperty(final String property) {
-		this.properties.put(property.toLowerCase(), new Excluded());
+		this.properties.put(property.toLowerCase(), new Excluded<Object>());
 		return this;
 	}
 
@@ -206,7 +206,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * @return the current matcher
 	 */
 	public TheSameAs<T> excludeType(final Class<?> type) {
-		this.types.put(type, new Excluded());
+		this.types.put(type, new Excluded<Object>());
 		return this;
 	}
 
@@ -232,7 +232,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * @param property the property to exclude from the comparison e.g LastName
 	 * @return the current matcher
 	 */
-	public TheSameAs<T> comparePath(final String path, final PropertyComparator comparator) {
+	public TheSameAs<T> comparePath(final String path, final PropertyComparator<?> comparator) {
 		this.paths.put(path.toLowerCase(), comparator);
 		return this;
 	}
@@ -260,7 +260,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * @param comparator the comparator to use
 	 * @return the current matcher
 	 */
-	public TheSameAs<T> compareProperty(final String path, final PropertyComparator comparator) {
+	public TheSameAs<T> compareProperty(final String path, final PropertyComparator<?> comparator) {
 		this.properties.put(path.toLowerCase(), comparator);
 		return this;
 	}
@@ -288,7 +288,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * @param comparator the comparator to use
 	 * @return the current matcher
 	 */
-	public TheSameAs<T> compareType(final Class<?> type, final PropertyComparator comparator) {
+	public <P> TheSameAs<T> compareType(final Class<P> type, final PropertyComparator<P> comparator) {
 		this.types.put(type, comparator);
 		return this;
 	}
@@ -346,7 +346,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 		final Class<? extends Object> klass = expected.getClass();
 		LOG.trace("Check override for type [{}]", klass);
-		for (Entry<Class<?>, PropertyComparator> entry : types.entrySet()) {
+		for (Entry<Class<?>, PropertyComparator<?>> entry : types.entrySet()) {
 			if (entry.getKey().isAssignableFrom(klass)) {
 				compareUsingPropertyComparator(expected, actual, path, entry.getValue(), ctx);
 				return;
@@ -371,7 +371,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		}
 	}
 
-	private PropertyComparator getPropertyComparator(final String propertyName) {
+	private PropertyComparator<?> getPropertyComparator(final String propertyName) {
 		return properties.get(propertyName);
 	}
 
@@ -465,6 +465,9 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		}
 	}
 
+	@SuppressWarnings({
+			"unchecked", "rawtypes"
+	})
 	private void compareUsingPropertyComparator(final Object lhs, final Object rhs, final String path, final PropertyComparator comparator, final MismatchContext ctx) {
 		LOG.debug("Compare path [{}] using [{}]", path, comparator.getClass().getSimpleName());
 		try {

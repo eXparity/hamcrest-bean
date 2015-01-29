@@ -8,9 +8,9 @@ import org.exparity.hamcrest.beans.TheSameAs.PropertyComparator;
  * 
  * @author Stewart Bissett
  */
-public class Excluded implements PropertyComparator {
+public class Excluded<T> implements PropertyComparator<T> {
 
-	public boolean matches(final Object lhs, final Object rhs) {
+	public boolean matches(final T lhs, final T rhs) {
 		return true;
 	}
 }

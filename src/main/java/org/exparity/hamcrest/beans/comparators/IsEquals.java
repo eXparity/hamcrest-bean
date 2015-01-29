@@ -8,9 +8,9 @@ import org.exparity.hamcrest.beans.TheSameAs.PropertyComparator;
  * 
  * @author Stewart Bissett
  */
-public class IsEquals implements PropertyComparator {
+public class IsEquals<T> implements PropertyComparator<T> {
 
-	public boolean matches(final Object lhs, final Object rhs) {
+	public boolean matches(final T lhs, final T rhs) {
 		return lhs == null ? rhs == null : lhs.equals(rhs);
 	}
 }

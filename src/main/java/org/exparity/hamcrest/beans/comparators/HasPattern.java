@@ -8,7 +8,7 @@ import org.exparity.hamcrest.beans.TheSameAs.PropertyComparator;
  * 
  * @author Stewart Bissett
  */
-public class HasPattern implements PropertyComparator {
+public class HasPattern implements PropertyComparator<String> {
 
 	private final String regex;
 
@@ -16,8 +16,8 @@ public class HasPattern implements PropertyComparator {
 		this.regex = regex;
 	}
 
-	public boolean matches(final Object lhs, final Object rhs) {
-		return lhs == null ? rhs == null : rhs instanceof String && ((String) rhs).matches(regex);
+	public boolean matches(final String lhs, final String rhs) {
+		return lhs == null ? rhs == null : rhs.matches(regex);
 	}
 
 }
