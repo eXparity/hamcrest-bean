@@ -80,6 +80,24 @@ or to override the match for a path;
     MyObject saved = dao.save(object);
     assertThat(save, theSameAs(object).compareType(String.class, new IsEqualIgnoreCase()));
 
+The matcher also supports using other [Java Hamcrest][] matchers to act as comparators.For example.
+
+    MyObject object = new MyObject();
+    MyObject saved = dao.save(object);
+    assertThat(save, theSameAs(object).comparePath("MyObject.Name", Matchers.startsWith("S")));
+
+or to override the match for a property;
+
+    MyObject object = new MyObject();
+    MyObject saved = dao.save(object);
+    assertThat(save, theSameAs(object).compareProperty("Name", Matchers.startsWith("S")));
+
+or to override the match for a path;
+
+    MyObject object = new MyObject();
+    MyObject saved = dao.save(object);
+    assertThat(save, theSameAs(object).compareType(String.class, Matchers.notNullValue()));
+
 The matcher exposes a fluent interface so multiple exclusions or overrides can be provider. For example
 
     MyObject object = new MyObject();
@@ -95,6 +113,7 @@ The libary includes several built in overrides for the comparison
 * __IsEquals__ - Test if the objects are equals
 * __IsEqualsIgnoreCase__ - Test if two string objects are equal regardless of case
 * __HasPattern__ - Test if the strings match the pattern
+
 
 The Javadocs include examples on all methods so you can look there for examples for specific methods.
 
