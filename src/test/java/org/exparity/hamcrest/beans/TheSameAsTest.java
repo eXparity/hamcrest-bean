@@ -7,7 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 import org.exparity.hamcrest.beans.TheSameAs.PropertyComparator;
 import org.exparity.hamcrest.beans.comparators.HasPattern;
+import org.exparity.hamcrest.beans.testutils.types.ClassContainingNestedClasses;
 import org.exparity.hamcrest.beans.testutils.types.ObjectWithAllTypes;
+import org.exparity.hamcrest.beans.testutils.types.OuterClass;
 import org.exparity.hamcrest.beans.testutils.types.SimpleType;
 import org.exparity.hamcrest.beans.testutils.types.SimpleTypeWithList;
 import org.junit.Test;
@@ -437,8 +439,17 @@ public class TheSameAsTest {
 	}
 
 	@Test
-	public void canOverridePathToUseMatcher() {
+	public void canMatchListsOfTypesWithInnerClasses() {
+		ClassContainingNestedClasses reference = new ClassContainingNestedClasses(new OuterClass("A"), new OuterClass("B"));
+		ClassContainingNestedClasses actual = new ClassContainingNestedClasses(new OuterClass("A"), new OuterClass("B"));
+		assertThat(actual, theSameAs(reference));
+	}
 
+	@Test(expected = AssertionError.class)
+	public void canMismatchListsOfTypesWithInnerClasses() {
+		ClassContainingNestedClasses reference = new ClassContainingNestedClasses(new OuterClass("A"), new OuterClass("B"));
+		ClassContainingNestedClasses actual = new ClassContainingNestedClasses(new OuterClass("C"), new OuterClass("D"));
+		assertThat(actual, theSameAs(reference));
 	}
 
 }

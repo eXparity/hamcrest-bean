@@ -532,8 +532,16 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 					Collections.sort(expectedList);
 					Collections.sort(actualList);
 				} else {
-					Collections.sort(expectedList, DEFAULT_COMPARATOR);
-					Collections.sort(actualList, DEFAULT_COMPARATOR);
+					try {
+						Collections.sort(expectedList, DEFAULT_COMPARATOR);
+						Collections.sort(actualList, DEFAULT_COMPARATOR);
+					} catch (Exception e) {
+						if (LOG.isDebugEnabled()) {
+							LOG.warn("Unable to sort list at property {}", path, e);
+						} else {
+							LOG.warn("Unable to sort list at property {}", path);
+						}
+					}
 				}
 				int ctr = 0;
 				for (Iterator i = expectedList.iterator(), j = actualList.iterator(); i.hasNext();) {
