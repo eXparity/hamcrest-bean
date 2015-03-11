@@ -16,4 +16,8 @@ public class ClassContainingNestedClasses {
 		return nested;
 	}
 
+	public void setNested(final List<OuterClass> nested) {
+		this.nested = nested;
+	}
+
 }

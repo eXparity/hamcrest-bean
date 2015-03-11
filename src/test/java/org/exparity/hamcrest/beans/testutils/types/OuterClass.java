@@ -17,7 +17,7 @@ public class OuterClass {
 
 	}
 
-	private final OuterClass.InnerClass inner;
+	private OuterClass.InnerClass inner;
 
 	public OuterClass(final String name) {
 		this.inner = new InnerClass(name);
@@ -25,6 +25,10 @@ public class OuterClass {
 
 	public String getName() {
 		return inner.name;
+	}
+
+	public void setName(final String name) {
+		this.inner = new InnerClass(name);
 	}
 
 }

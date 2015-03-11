@@ -21,7 +21,7 @@ import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.exparity.beans.Type;
-import org.exparity.beans.core.ImmutableTypeProperty;
+import org.exparity.beans.core.*;
 import org.exparity.beans.core.naming.CapitalizedNamingStrategy;
 import org.exparity.hamcrest.beans.comparators.Excluded;
 import org.exparity.hamcrest.beans.comparators.HamcrestComparator;
@@ -49,6 +49,25 @@ import static org.exparity.beans.Type.type;
 public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 	/**
+	 * Enumeration of the types of properties the matcher will check.
+	 * 
+	 * @author Stewart Bissett
+	 */
+	public static enum PropertyType {
+
+		/**
+		 * Check properties which follow the Java beans standard i.e. have both a get or is and set pair
+		 */
+		BEAN,
+
+		/**
+		 * Check all getter style properties i.e. no arguments, method return name starts with get or is, and returns non-void. </p>
+		 * <em>This is the default option if not property type is supplied.</em>
+		 */
+		ALL_GETTERS
+	};
+
+	/**
 	 * Creates a matcher that matches the full object graph for the given instance against another instance
 	 * <p/>
 	 * For example:
@@ -63,7 +82,26 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 */
 	@Factory
 	public static <T> TheSameAs<T> theSameAs(final T object) {
-		return new TheSameAs<T>(object);
+		return new TheSameAs<T>(object, PropertyType.ALL_GETTERS);
+	}
+
+	/**
+	 * Creates a matcher that matches the full object graph for the given instance against another instance
+	 * <p/>
+	 * For example:
+	 * 
+	 * <pre>
+	 * MyObject instance = new MyObject();
+	 * dao.save(instance); // Save instance to persistent store
+	 * assertThat(dao.getById(instance.getId()), theSameAs(instance);
+	 * </pre>
+	 * 
+	 * @param object the instance to match against
+	 * @param propertyTypes the types of properties to compare
+	 */
+	@Factory
+	public static <T> TheSameAs<T> theSameAs(final T object, final PropertyType propertyTypes) {
+		return new TheSameAs<T>(object, propertyTypes);
 	}
 
 	/**
@@ -82,7 +120,27 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 */
 	@Factory
 	public static <T> TheSameAs<T> theSameAs(final T object, final String name) {
-		return new TheSameAs<T>(object, name);
+		return new TheSameAs<T>(object, name, PropertyType.ALL_GETTERS);
+	}
+
+	/**
+	 * Creates a matcher that matches the full object graph for the given instance against another instance
+	 * <p/>
+	 * For example:
+	 * 
+	 * <pre>
+	 * MyObject instance = new MyObject();
+	 * dao.save(instance); // Save instance to persistent store
+	 * assertThat(dao.getById(instance.getId()), theSameAs(instance, "MyInstance");
+	 * </pre>
+	 * 
+	 * @param object the instance to match against
+	 * @param propertyTypes the types of properties to compare
+	 * @param name the name given to the root entity
+	 */
+	@Factory
+	public static <T> TheSameAs<T> theSameAs(final T object, final String name, final PropertyType propertyTypes) {
+		return new TheSameAs<T>(object, name, propertyTypes);
 	}
 
 	private static final Logger LOG = LoggerFactory.getLogger(TheSameAs.class);
@@ -112,12 +170,17 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 	private final T object;
 	private final String name;
+	private final PropertyType propertyTypes;
 
 	public TheSameAs(final T object) {
-		this(object, object.getClass().getSimpleName());
+		this(object, PropertyType.BEAN);
 	}
 
-	public TheSameAs(final T object, final String name) {
+	public TheSameAs(final T object, final PropertyType propertyTypes) {
+		this(object, object.getClass().getSimpleName(), propertyTypes);
+	}
+
+	public TheSameAs(final T object, final String name, final PropertyType propertyTypes) {
 		this.types.put(BigDecimal.class, new IsComparable<BigDecimal>());
 		this.types.put(String.class, new IsEquals<String>());
 		this.types.put(Integer.class, new IsEquals<Integer>());
@@ -129,6 +192,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		this.types.put(Class.class, new Excluded<Class<?>>());
 		this.object = object;
 		this.name = name;
+		this.propertyTypes = propertyTypes;
 	}
 
 	/**
@@ -445,8 +509,14 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		} else if (type.is(Map.class)) {
 			compareMaps((Map) expected, (Map) actual, path, ctx);
 		} else {
-			for (ImmutableTypeProperty property : type.accessorList()) {
-				compareObjects(property.getValue(expected), property.getValue(actual), path + getDotIfRequired(path) + property.getName(), ctx);
+			if (PropertyType.ALL_GETTERS.equals(this.propertyTypes)) {
+				for (ImmutableTypeProperty property : type.accessorList()) {
+					compareObjects(property.getValue(expected), property.getValue(actual), path + getDotIfRequired(path) + property.getName(), ctx);
+				}
+			} else {
+				for (TypeProperty property : type.propertyList()) {
+					compareObjects(property.getValue(expected), property.getValue(actual), path + getDotIfRequired(path) + property.getName(), ctx);
+				}
 			}
 		}
 	}

@@ -1,24 +1,19 @@
 
 package org.exparity.hamcrest.beans;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.math.*;
+import java.util.*;
 import org.exparity.hamcrest.beans.TheSameAs.PropertyComparator;
-import org.exparity.hamcrest.beans.comparators.HasPattern;
-import org.exparity.hamcrest.beans.testutils.types.ClassContainingNestedClasses;
-import org.exparity.hamcrest.beans.testutils.types.ObjectWithAllTypes;
-import org.exparity.hamcrest.beans.testutils.types.OuterClass;
-import org.exparity.hamcrest.beans.testutils.types.SimpleType;
-import org.exparity.hamcrest.beans.testutils.types.SimpleTypeWithList;
-import org.junit.Test;
-import static java.util.Collections.singletonMap;
-import static org.apache.commons.lang.time.DateUtils.addDays;
-import static org.exparity.hamcrest.BeanMatchers.theSameAs;
-import static org.exparity.stub.random.RandomBuilder.aRandomString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.startsWith;
+import org.exparity.hamcrest.beans.TheSameAs.PropertyType;
+import org.exparity.hamcrest.beans.comparators.*;
+import org.exparity.hamcrest.beans.testutils.types.*;
+import org.junit.*;
+import static java.util.Collections.*;
+import static org.apache.commons.lang.time.DateUtils.*;
+import static org.exparity.hamcrest.BeanMatchers.*;
+import static org.exparity.stub.random.RandomBuilder.*;
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
 
 /**
  * Unit Test for {@link TheSameAs}
@@ -450,6 +445,20 @@ public class TheSameAsTest {
 		ClassContainingNestedClasses reference = new ClassContainingNestedClasses(new OuterClass("A"), new OuterClass("B"));
 		ClassContainingNestedClasses actual = new ClassContainingNestedClasses(new OuterClass("C"), new OuterClass("D"));
 		assertThat(actual, theSameAs(reference));
+	}
+
+	@Test(expected = AssertionError.class)
+	public void canMatchNonBeanProperties() {
+		NotBean reference = new NotBean(aRandomString(10), aRandomString(10));
+		NotBean actual = new NotBean(reference.getStringA(), reference.getStringB() + aRandomString(10));
+		assertThat(actual, theSameAs(reference));
+	}
+
+	@Test
+	public void canIgnoreNonBeanProperties() {
+		NotBean reference = new NotBean(aRandomString(10), aRandomString(10));
+		NotBean actual = new NotBean(reference.getStringA(), reference.getStringB() + aRandomString(10));
+		assertThat(actual, theSameAs(reference, PropertyType.BEAN));
 	}
 
 }
