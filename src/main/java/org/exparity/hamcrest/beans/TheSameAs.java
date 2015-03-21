@@ -1,4 +1,3 @@
-
 package org.exparity.hamcrest.beans;
 
 import java.lang.reflect.Array;
@@ -37,11 +36,14 @@ import static org.apache.commons.lang.StringUtils.substringAfterLast;
 import static org.exparity.beans.Type.type;
 
 /**
- * Implementation of a {@link Matcher} for performing a deep comparison of two objects by testing getters which start with <em>get</em>, <em>is</em>, or <em>has</em> are the same
- * on each instances.
+ * Implementation of a {@link Matcher} for performing a deep comparison of two
+ * objects by testing getters which start with <em>get</em>, <em>is</em>, or
+ * <em>has</em> are the same on each instances.
  * <p>
- * When comparing elements in a collection or an array the {@link Matcher} orders a copy of the collection. If there is a default comparator then one will be used, or alternatively
- * one will built using {@link org.apache.commons.lang.builder.CompareToBuilder#reflectionCompare(Object, Object)}
+ * When comparing elements in a collection or an array the {@link Matcher}
+ * orders a copy of the collection. If there is a default comparator then one
+ * will be used, or alternatively one will built using
+ * {@link org.apache.commons.lang.builder.CompareToBuilder#reflectionCompare(Object, Object)}
  * </p>
  * 
  * @author Stewart Bissett
@@ -56,19 +58,22 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	public static enum PropertyType {
 
 		/**
-		 * Check properties which follow the Java beans standard i.e. have both a get or is and set pair
+		 * Check properties which follow the Java beans standard i.e. have both
+		 * a get or is and set pair
 		 */
 		BEAN,
 
 		/**
-		 * Check all getter style properties i.e. no arguments, method return name starts with get or is, and returns non-void. </p>
+		 * Check all getter style properties i.e. no arguments, method return
+		 * name starts with get or is, and returns non-void. </p>
 		 * <em>This is the default option if not property type is supplied.</em>
 		 */
 		ALL_GETTERS
 	};
 
 	/**
-	 * Creates a matcher that matches the full object graph for the given instance against another instance
+	 * Creates a matcher that matches the full object graph for the given
+	 * instance against another instance
 	 * <p/>
 	 * For example:
 	 * 
@@ -78,7 +83,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * assertThat(dao.getById(instance.getId()), theSameAs(instance);
 	 * </pre>
 	 * 
-	 * @param object the instance to match against
+	 * @param object
+	 *            the instance to match against
 	 */
 	@Factory
 	public static <T> TheSameAs<T> theSameAs(final T object) {
@@ -86,7 +92,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	/**
-	 * Creates a matcher that matches the full object graph for the given instance against another instance
+	 * Creates a matcher that matches the full object graph for the given
+	 * instance against another instance
 	 * <p/>
 	 * For example:
 	 * 
@@ -96,8 +103,10 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * assertThat(dao.getById(instance.getId()), theSameAs(instance);
 	 * </pre>
 	 * 
-	 * @param object the instance to match against
-	 * @param propertyTypes the types of properties to compare
+	 * @param object
+	 *            the instance to match against
+	 * @param propertyTypes
+	 *            the types of properties to compare
 	 */
 	@Factory
 	public static <T> TheSameAs<T> theSameAs(final T object, final PropertyType propertyTypes) {
@@ -105,7 +114,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	/**
-	 * Creates a matcher that matches the full object graph for the given instance against another instance
+	 * Creates a matcher that matches the full object graph for the given
+	 * instance against another instance
 	 * <p/>
 	 * For example:
 	 * 
@@ -115,8 +125,10 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * assertThat(dao.getById(instance.getId()), theSameAs(instance, "MyInstance");
 	 * </pre>
 	 * 
-	 * @param object the instance to match against
-	 * @param name the name given to the root entity
+	 * @param object
+	 *            the instance to match against
+	 * @param name
+	 *            the name given to the root entity
 	 */
 	@Factory
 	public static <T> TheSameAs<T> theSameAs(final T object, final String name) {
@@ -124,7 +136,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	/**
-	 * Creates a matcher that matches the full object graph for the given instance against another instance
+	 * Creates a matcher that matches the full object graph for the given
+	 * instance against another instance
 	 * <p/>
 	 * For example:
 	 * 
@@ -134,9 +147,12 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * assertThat(dao.getById(instance.getId()), theSameAs(instance, "MyInstance");
 	 * </pre>
 	 * 
-	 * @param object the instance to match against
-	 * @param propertyTypes the types of properties to compare
-	 * @param name the name given to the root entity
+	 * @param object
+	 *            the instance to match against
+	 * @param propertyTypes
+	 *            the types of properties to compare
+	 * @param name
+	 *            the name given to the root entity
 	 */
 	@Factory
 	public static <T> TheSameAs<T> theSameAs(final T object, final String name, final PropertyType propertyTypes) {
@@ -146,12 +162,14 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	private static final Logger LOG = LoggerFactory.getLogger(TheSameAs.class);
 
 	/**
-	 * Interface to be implemented by classes which can compare two property values to confirm if they're equivalent
+	 * Interface to be implemented by classes which can compare two property
+	 * values to confirm if they're equivalent
 	 */
 	public interface PropertyComparator<T> {
 
 		/**
-		 * Return <code>true</code> if the actual value matches the expected value
+		 * Return <code>true</code> if the actual value matches the expected
+		 * value
 		 */
 		public boolean matches(final T lhs, final T rhs);
 	}
@@ -214,7 +232,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * MatcherAssert.assertThat(new Person("John", "Doe"), BeanMatchers.theSameAs(expected).excludePath("Person.LastName"));
 	 * </pre>
 	 * 
-	 * @param property the path to exclude from the comparison e.g Person.LastName
+	 * @param property
+	 *            the path to exclude from the comparison e.g Person.LastName
 	 * @return the current matcher
 	 */
 	public TheSameAs<T> excludePath(final String path) {
@@ -241,7 +260,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * MatcherAssert.assertThat(new Person("John", "Doe"), BeanMatchers.theSameAs(expected).excludeProperty("LastName"));
 	 * </pre>
 	 * 
-	 * @param property the property to exclude from the comparison e.g LastName
+	 * @param property
+	 *            the property to exclude from the comparison e.g LastName
 	 * @return the current matcher
 	 */
 	public TheSameAs<T> excludeProperty(final String property) {
@@ -268,7 +288,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * MatcherAssert.assertThat(new Person("John", "Doe"), BeanMatchers.theSameAs(expected).excludeType(String.class));
 	 * </pre>
 	 * 
-	 * @param type the type to exclude from the comparison e.g String.class
+	 * @param type
+	 *            the type to exclude from the comparison e.g String.class
 	 * @return the current matcher
 	 */
 	public TheSameAs<T> excludeType(final Class<?> type) {
@@ -295,7 +316,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * MatcherAssert.assertThat(new Person("john", "doe"), BeanMatchers.theSameAs(expected).comparePath("Person.LastName", new IsEqualsIgnoreCase());
 	 * </pre>
 	 * 
-	 * @param property the property to exclude from the comparison e.g LastName
+	 * @param property
+	 *            the property to exclude from the comparison e.g LastName
 	 * @return the current matcher
 	 */
 	public TheSameAs<T> comparePath(final String path, final PropertyComparator<?> comparator) {
@@ -322,8 +344,10 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * MatcherAssert.assertThat(new Person("john", "doe"), BeanMatchers.theSameAs(expected).comparePath("Person.LastName", new IsEqualsIgnoreCase());
 	 * </pre>
 	 * 
-	 * @param path the path to set the comparator for
-	 * @param comparator the comparator to use
+	 * @param path
+	 *            the path to set the comparator for
+	 * @param comparator
+	 *            the comparator to use
 	 * @return the current matcher
 	 */
 	public TheSameAs<T> compareProperty(final String path, final PropertyComparator<?> comparator) {
@@ -350,8 +374,10 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * MatcherAssert.assertThat(new Person("john", "doe"), BeanMatchers.theSameAs(expected).compareType(String.class, new IsEqualsIgnoreCase());
 	 * </pre>
 	 * 
-	 * @param type the type to set the comparator for
-	 * @param comparator the comparator to use
+	 * @param type
+	 *            the type to set the comparator for
+	 * @param comparator
+	 *            the comparator to use
 	 * @return the current matcher
 	 */
 	public <P> TheSameAs<T> compareType(final Class<P> type, final PropertyComparator<P> comparator) {
@@ -360,7 +386,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	/**
-	 * Override the PropertyComparator used for a path to use a hamcrest Matcher. For example</p>
+	 * Override the PropertyComparator used for a path to use a hamcrest
+	 * Matcher. For example</p>
 	 * 
 	 * <pre>
 	 * class Person [
@@ -378,7 +405,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * MatcherAssert.assertThat(new Person("John", "Deer"), BeanMatchers.theSameAs(expected).comparePath("Person.LastName", Matchers.startsWith("D")));
 	 * </pre>
 	 * 
-	 * @param property the property to exclude from the comparison e.g LastName
+	 * @param property
+	 *            the property to exclude from the comparison e.g LastName
 	 * @return the current matcher
 	 */
 	public <P> TheSameAs<T> comparePath(final String path, final Matcher<P> matcher) {
@@ -387,7 +415,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	/**
-	 * Override the PropertyComparator used for a property to use a hamcrest matcher. For example</p>
+	 * Override the PropertyComparator used for a property to use a hamcrest
+	 * matcher. For example</p>
 	 * 
 	 * <pre>
 	 * class Person [
@@ -405,8 +434,10 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * MatcherAssert.assertThat(new Person("John", "Deer"), BeanMatchers.theSameAs(expected).comparePath("Person.LastName", Matchers.startsWith("D")));
 	 * </pre>
 	 * 
-	 * @param path the path to set the comparator for
-	 * @param matcher the matcher to use
+	 * @param path
+	 *            the path to set the comparator for
+	 * @param matcher
+	 *            the matcher to use
 	 * @return the current matcher
 	 */
 	public <P> TheSameAs<T> compareProperty(final String path, final Matcher<P> matcher) {
@@ -415,7 +446,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	/**
-	 * Override the PropertyComparator used for a type to use a hamcrest Matcher. For example</p>
+	 * Override the PropertyComparator used for a type to use a hamcrest
+	 * Matcher. For example</p>
 	 * 
 	 * <pre>
 	 * class Person [
@@ -433,8 +465,10 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * MatcherAssert.assertThat(new Person("John", "Doe"), BeanMatchers.theSameAs(expected).compareType(String.class, Matchers.startsWith("J")));
 	 * </pre>
 	 * 
-	 * @param type the type to set the comparator for
-	 * @param matcher the matcher to use
+	 * @param type
+	 *            the type to set the comparator for
+	 * @param matcher
+	 *            the matcher to use
 	 * @return the current matcher
 	 */
 	public <P> TheSameAs<T> compareType(final Class<P> type, final Matcher<P> matcher) {
@@ -456,9 +490,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	@SuppressWarnings("rawtypes")
 	private void compareObjects(final Object expected, final Object actual, final String path, final MismatchContext ctx) {
 
-		LOG.trace("Compare [{}] vs [{}] at [{}]", new Object[] {
-				expected, actual, path
-		});
+		LOG.trace("Compare [{}] vs [{}] at [{}]", new Object[] { expected, actual, path });
 
 		String pathNoIndexes = path.replaceAll("\\[\\w*\\]\\.", ".").toLowerCase();
 		String propertyName = StringUtils.contains(path, ".") ? substringAfterLast(pathNoIndexes, ".") : pathNoIndexes;
@@ -472,7 +504,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 			}
 		} else if (expected == null && actual == null) {
 			return;
-		}
+		} 
 
 		LOG.trace("Check override for path [{}]", pathNoIndexes);
 		PropertyComparator pathComparator = paths.get(pathNoIndexes);
@@ -495,6 +527,11 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 				compareUsingPropertyComparator(expected, actual, path, entry.getValue(), ctx);
 				return;
 			}
+		}
+		
+		if (expected != null && actual == null || expected == null && actual != null) {
+			ctx.addMismatch(expected, actual, path);
+			return;
 		}
 
 		final Type type = type(klass, new CapitalizedNamingStrategy());
@@ -579,16 +616,12 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		return StringUtils.isNotBlank(path) ? "." : "";
 	}
 
-	@SuppressWarnings({
-			"unchecked", "rawtypes"
-	})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void compareCollections(final Collection expected, final Collection actual, final String path, final MismatchContext ctx) {
 		compareLists(new ArrayList(expected), new ArrayList(actual), path, ctx);
 	}
 
-	@SuppressWarnings({
-			"unchecked", "rawtypes"
-	})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void compareLists(final List expected, final List actual, final String path, final MismatchContext ctx) {
 		LOG.debug("Compare path [{}] as list", path);
 		try {
@@ -623,10 +656,9 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		}
 	}
 
-	@SuppressWarnings({
-			"unchecked", "rawtypes"
-	})
-	private void compareUsingPropertyComparator(final Object lhs, final Object rhs, final String path, final PropertyComparator comparator, final MismatchContext ctx) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void compareUsingPropertyComparator(final Object lhs, final Object rhs, final String path, final PropertyComparator comparator,
+			final MismatchContext ctx) {
 		LOG.debug("Compare path [{}] using [{}]", path, comparator.getClass().getSimpleName());
 		try {
 			if (!comparator.matches(lhs, rhs)) {
@@ -689,7 +721,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 			desc.appendText(path).appendText(" is ").appendValue(actual).appendText(" instead of ").appendValue(expected);
 			same = false;
 		}
-
+		
 		private boolean isFirstMismatch() {
 			return same == true;
 		}

@@ -1,4 +1,3 @@
-
 package org.exparity.hamcrest.beans;
 
 import java.math.*;
@@ -92,65 +91,39 @@ public class TheSameAsTest {
 
 	@Test
 	public void canCompareArrays() {
-		assertThat(new String[] {
-				"abc", "xyz"
-		}, theSameAs(new String[] {
-				"abc", "xyz"
-		}));
+		assertThat(new String[] { "abc", "xyz" }, theSameAs(new String[] { "abc", "xyz" }));
 	}
 
 	@Test
 	public void canCompareArrayOfBytes() {
-		assertThat(new byte[] {
-				0x01, 0x02
-		}, theSameAs(new byte[] {
-				0x01, 0x02
-		}));
+		assertThat(new byte[] { 0x01, 0x02 }, theSameAs(new byte[] { 0x01, 0x02 }));
 	}
 
 	@Test(expected = AssertionError.class)
 	public void canCompareDifferentArraySizes() {
-		assertThat(new String[] {
-				"abc", "xyz"
-		}, theSameAs(new String[] {
-				"abc"
-		}));
+		assertThat(new String[] { "abc", "xyz" }, theSameAs(new String[] { "abc" }));
 	}
 
 	@Test(expected = AssertionError.class)
 	public void canCompareDifferentStringArrays() {
-		assertThat(new String[] {
-				"abc", "xyz"
-		}, theSameAs(new String[] {
-				"def", "xyz"
-		}));
+		assertThat(new String[] { "abc", "xyz" }, theSameAs(new String[] { "def", "xyz" }));
 	}
 
 	@Test(expected = AssertionError.class)
 	public void canCompareDifferentByteArrays() {
-		assertThat(new byte[] {
-				0x01, 0x02
-		}, theSameAs(new byte[] {
-				0x02, 0x01
-		}));
+		assertThat(new byte[] { 0x01, 0x02 }, theSameAs(new byte[] { 0x02, 0x01 }));
 	}
 
 	@Test
 	public void canCompareObjectArrays() {
-		assertThat(new SimpleType[] {
-				new SimpleType("A"), new SimpleType("B")
-		}, theSameAs(new SimpleType[] {
-				new SimpleType("A"), new SimpleType("B")
-		}));
+		assertThat(new SimpleType[] { new SimpleType("A"), new SimpleType("B") }, theSameAs(new SimpleType[] { new SimpleType("A"),
+				new SimpleType("B") }));
 	}
 
 	@Test(expected = AssertionError.class)
 	public void canCompareDifferentObjectArrays() {
-		assertThat(new SimpleType[] {
-				new SimpleType("A"), new SimpleType("B")
-		}, theSameAs(new SimpleType[] {
-				new SimpleType("A"), new SimpleType("C")
-		}));
+		assertThat(new SimpleType[] { new SimpleType("A"), new SimpleType("B") }, theSameAs(new SimpleType[] { new SimpleType("A"),
+				new SimpleType("C") }));
 	}
 
 	@Test
@@ -459,6 +432,13 @@ public class TheSameAsTest {
 		NotBean reference = new NotBean(aRandomString(10), aRandomString(10));
 		NotBean actual = new NotBean(reference.getStringA(), reference.getStringB() + aRandomString(10));
 		assertThat(actual, theSameAs(reference, PropertyType.BEAN));
+	}
+
+	@Test(expected = AssertionError.class)
+	public void canTestNestedNullObjects() {
+		SimpleTypeWithSimpleType reference = aRandomInstanceOf(SimpleTypeWithSimpleType.class);
+		SimpleTypeWithSimpleType actual = new SimpleTypeWithSimpleType();
+		assertThat(actual, theSameAs(reference));
 	}
 
 }
