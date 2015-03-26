@@ -18,12 +18,12 @@ A maven project
     <dependency>
         <groupId>org.exparity</groupId>
         <artifactId>hamcrest-date</artifactId>
-        <version>1.0.4</version>
+        <version>1.0.5</version>
     </dependency>
 
 A project which uses ivy for dependency management
 
-    <dependency org="org.exparity" name="hamcrest-date" rev="1.0.4"/>
+    <dependency org="org.exparity" name="hamcrest-date" rev="1.0.5"/>
             
 Binaries
 --------
@@ -128,8 +128,10 @@ The source includes a pom.xml for building with Maven
 
 Release Notes
 -------------
+Changes 1.0.4 -> 1.0.5
+  * Fix issue 4 comparing null nested objects
 Changes 1.0.3 -> 1.0.4
-  * Stronly type PropertyComparator
+  * Strongly type PropertyComparator
 
 
 Acknowledgements
