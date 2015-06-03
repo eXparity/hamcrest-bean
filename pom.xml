@@ -3,7 +3,7 @@
 
 	<groupId>org.exparity</groupId>
 	<artifactId>hamcrest-bean</artifactId>
-	<version>1.0.9</version>
+	<version>1.0.10-SNAPSHOT</version>
 
 	<name>Hamcrest Bean</name>
 	<url>https://github.com/exparity/hamcrest-bean</url>
