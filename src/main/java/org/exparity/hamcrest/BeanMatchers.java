@@ -117,7 +117,14 @@ public abstract class BeanMatchers {
 	 *             {@link #theSameBeanAs(Object)}
 	 */
 	public static <T> TheSameAs<T> theSameAs(final T object, final PropertyType propertyType) {
-		return TheSameAs.theSameAs(object, propertyType);
+		switch (propertyType) {
+		case BEAN:
+			return TheSameAs.theSameBeanAs(object);
+		case ALL_GETTERS:
+			return TheSameAs.theSameAs(object);
+		default:
+			throw new IllegalArgumentException("Unsupported property type " + propertyType);
+		}
 	}
 
 	/**
@@ -235,7 +242,14 @@ public abstract class BeanMatchers {
 	 */
 	@Deprecated
 	public static <T> TheSameAs<T> theSameAs(final T object, final String name, final PropertyType propertyType) {
-		return TheSameAs.theSameAs(object, name, propertyType);
+		switch (propertyType) {
+		case BEAN:
+			return TheSameAs.theSameBeanAs(object, name);
+		case ALL_GETTERS:
+			return TheSameAs.theSameAs(object, name);
+		default:
+			throw new IllegalArgumentException("Unsupported property type " + propertyType);
+		}
 	}
 
 	/**

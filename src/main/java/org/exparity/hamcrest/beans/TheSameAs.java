@@ -1,5 +1,8 @@
 package org.exparity.hamcrest.beans;
 
+import static org.apache.commons.lang.StringUtils.substringAfterLast;
+import static org.exparity.beans.Type.type;
+
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -14,13 +17,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.exparity.beans.Type;
-import org.exparity.beans.core.*;
+import org.exparity.beans.core.ImmutableTypeProperty;
+import org.exparity.beans.core.TypeProperty;
 import org.exparity.beans.core.naming.CapitalizedNamingStrategy;
 import org.exparity.hamcrest.beans.comparators.Excluded;
 import org.exparity.hamcrest.beans.comparators.HamcrestComparator;
@@ -32,8 +37,6 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.apache.commons.lang.StringUtils.substringAfterLast;
-import static org.exparity.beans.Type.type;
 
 /**
  * Implementation of a {@link Matcher} for performing a deep comparison of two
@@ -121,32 +124,6 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * <pre>
 	 * MyObject instance = new MyObject();
 	 * dao.save(instance); // Save instance to persistent store
-	 * assertThat(dao.getById(instance.getId()), theSameAs(instance);
-	 * </pre>
-	 * 
-	 * @param object
-	 *            the instance to match against
-	 * @param propertyTypes
-	 *            the types of properties to compare
-	 * 
-	 * @deprecated User either {@link #theSameAs(Object)} or
-	 *             {@link #theSameBeanAs(Object)}
-	 */
-	@Factory
-	@Deprecated
-	public static <T> TheSameAs<T> theSameAs(final T object, final PropertyType propertyTypes) {
-		return new TheSameAs<T>(object, propertyTypes);
-	}
-
-	/**
-	 * Creates a matcher that matches the full object graph for the given
-	 * instance against another instance
-	 * <p/>
-	 * For example:
-	 * 
-	 * <pre>
-	 * MyObject instance = new MyObject();
-	 * dao.save(instance); // Save instance to persistent store
 	 * assertThat(dao.getById(instance.getId()), theSameAs(instance, "MyInstance");
 	 * </pre>
 	 * 
@@ -181,34 +158,6 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	@Factory
 	public static <T> TheSameAs<T> theSameBeanAs(final T object, final String name) {
 		return new TheSameAs<T>(object, name, PropertyType.BEAN);
-	}
-
-	/**
-	 * Creates a matcher that matches the full object graph for the given
-	 * instance against another instance
-	 * <p/>
-	 * For example:
-	 * 
-	 * <pre>
-	 * MyObject instance = new MyObject();
-	 * dao.save(instance); // Save instance to persistent store
-	 * assertThat(dao.getById(instance.getId()), theSameAs(instance, "MyInstance");
-	 * </pre>
-	 * 
-	 * @param object
-	 *            the instance to match against
-	 * @param propertyTypes
-	 *            the types of properties to compare
-	 * @param name
-	 *            the name given to the root entity
-	 * 
-	 * @deprecated Use either {@link #theSameAs(Object, String)} or
-	 *             {@link #theSameBeanAs(Object, String)}
-	 */
-	@Factory
-	@Deprecated
-	public static <T> TheSameAs<T> theSameAs(final T object, final String name, final PropertyType propertyTypes) {
-		return new TheSameAs<T>(object, name, propertyTypes);
 	}
 
 	private static final Logger LOG = LoggerFactory.getLogger(TheSameAs.class);
