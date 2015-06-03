@@ -18,12 +18,12 @@ A maven project
     <dependency>
         <groupId>org.exparity</groupId>
         <artifactId>hamcrest-date</artifactId>
-        <version>1.0.8</version>
+        <version>1.0.9</version>
     </dependency>
 
 A project which uses ivy for dependency management
 
-    <dependency org="org.exparity" name="hamcrest-date" rev="1.0.8"/>
+    <dependency org="org.exparity" name="hamcrest-date" rev="1.0.9"/>
             
 Binaries
 --------
@@ -106,8 +106,21 @@ The matcher exposes a fluent interface so multiple exclusions or overrides can b
                          .compareType(String.class, new IsEqualIgnoreCase())
                          .excludeProperty("Id")
                          .excludePath("MyObject.Name"));
+
+If you only want to include bean properties, those which have both a getter and setter pair, in the comparison then use the theSameBeanAs matcher. For example 
+
+    MyObject object = new MyObject();
+    MyObject saved = dao.save(object);
+    MatcherAssert.assertThat(save, BeanMatchers.theSameBeanAs(object));
+
+or after static importing
+
+    MyObject object = new MyObject();
+    MyObject saved = dao.save(object);
+    assertThat(save, theSameBeanAs(object));
+
  
-The libary includes several built in overrides for the comparison
+The library includes several built in overrides for the comparison
 
 * __IsComparable__ - Test if the objects are comparable
 * __IsEquals__ - Test if the objects are equals
@@ -128,6 +141,8 @@ The source includes a pom.xml for building with Maven
 
 Release Notes
 -------------
+Changes 1.0.8 -> 1.0.9
+  * Add theSameBeanAs matchers
 Changes 1.0.4 -> 1.0.8
   * Fix issue 4 comparing null nested objects
 Changes 1.0.3 -> 1.0.4
@@ -138,6 +153,7 @@ Acknowledgements
 ----------------
 Developers:
   * Stewart Bissett
+  * Simon Birt
 
 Thanks to the developers at [Java Hamcrest][]. Without their hardwork and core libraries there'd be nothing to be extend and we be stuck with old school, non-declarative, non-reusable, assertions.
 
