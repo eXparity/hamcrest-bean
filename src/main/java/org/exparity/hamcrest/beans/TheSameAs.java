@@ -73,7 +73,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 	/**
 	 * Creates a matcher that matches the full object graph for the given
-	 * instance against another instance
+	 * instance against another instance by comparing all getter properties
 	 * <p/>
 	 * For example:
 	 * 
@@ -93,6 +93,27 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 	/**
 	 * Creates a matcher that matches the full object graph for the given
+	 * instance against another instance by comparing bean properties i.e.
+	 * properties with both a getter and a setter
+	 * <p/>
+	 * For example:
+	 * 
+	 * <pre>
+	 * MyObject instance = new MyObject();
+	 * dao.save(instance); // Save instance to persistent store
+	 * assertThat(dao.getById(instance.getId()), theSameBeanAs(instance);
+	 * </pre>
+	 * 
+	 * @param object
+	 *            the instance to match against
+	 */
+	@Factory
+	public static <T> TheSameAs<T> theSameBeanAs(final T object) {
+		return new TheSameAs<T>(object, PropertyType.BEAN);
+	}
+
+	/**
+	 * Creates a matcher that matches the full object graph for the given
 	 * instance against another instance
 	 * <p/>
 	 * For example:
@@ -107,8 +128,12 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 *            the instance to match against
 	 * @param propertyTypes
 	 *            the types of properties to compare
+	 * 
+	 * @deprecated User either {@link #theSameAs(Object)} or
+	 *             {@link #theSameBeanAs(Object)}
 	 */
 	@Factory
+	@Deprecated
 	public static <T> TheSameAs<T> theSameAs(final T object, final PropertyType propertyTypes) {
 		return new TheSameAs<T>(object, propertyTypes);
 	}
@@ -137,6 +162,29 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 	/**
 	 * Creates a matcher that matches the full object graph for the given
+	 * instance against another instance by comparing bean properties i.e.
+	 * properties with both a getter and a setter
+	 * <p/>
+	 * For example:
+	 * 
+	 * <pre>
+	 * MyObject instance = new MyObject();
+	 * dao.save(instance); // Save instance to persistent store
+	 * assertThat(dao.getById(instance.getId()), theSameBeanAs(instance, "MyInstance");
+	 * </pre>
+	 * 
+	 * @param object
+	 *            the instance to match against
+	 * @param name
+	 *            the name given to the root entity
+	 */
+	@Factory
+	public static <T> TheSameAs<T> theSameBeanAs(final T object, final String name) {
+		return new TheSameAs<T>(object, name, PropertyType.BEAN);
+	}
+
+	/**
+	 * Creates a matcher that matches the full object graph for the given
 	 * instance against another instance
 	 * <p/>
 	 * For example:
@@ -153,8 +201,12 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 *            the types of properties to compare
 	 * @param name
 	 *            the name given to the root entity
+	 * 
+	 * @deprecated Use either {@link #theSameAs(Object, String)} or
+	 *             {@link #theSameBeanAs(Object, String)}
 	 */
 	@Factory
+	@Deprecated
 	public static <T> TheSameAs<T> theSameAs(final T object, final String name, final PropertyType propertyTypes) {
 		return new TheSameAs<T>(object, name, propertyTypes);
 	}
@@ -488,7 +540,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private void compareObjects(final Object expected, final Object actual, final String path, final MismatchContext ctx) {
+	private void
+			compareObjects(final Object expected, final Object actual, final String path, final MismatchContext ctx) {
 
 		LOG.trace("Compare [{}] vs [{}] at [{}]", new Object[] { expected, actual, path });
 
@@ -504,7 +557,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 			}
 		} else if (expected == null && actual == null) {
 			return;
-		} 
+		}
 
 		LOG.trace("Check override for path [{}]", pathNoIndexes);
 		PropertyComparator pathComparator = paths.get(pathNoIndexes);
@@ -528,7 +581,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 				return;
 			}
 		}
-		
+
 		if (expected != null && actual == null || expected == null && actual != null) {
 			ctx.addMismatch(expected, actual, path);
 			return;
@@ -548,11 +601,19 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		} else {
 			if (PropertyType.ALL_GETTERS.equals(this.propertyTypes)) {
 				for (ImmutableTypeProperty property : type.accessorList()) {
-					compareObjects(property.getValue(expected), property.getValue(actual), path + getDotIfRequired(path) + property.getName(), ctx);
+					compareObjects(
+							property.getValue(expected),
+								property.getValue(actual),
+								path + getDotIfRequired(path) + property.getName(),
+								ctx);
 				}
 			} else {
 				for (TypeProperty property : type.propertyList()) {
-					compareObjects(property.getValue(expected), property.getValue(actual), path + getDotIfRequired(path) + property.getName(), ctx);
+					compareObjects(
+							property.getValue(expected),
+								property.getValue(actual),
+								path + getDotIfRequired(path) + property.getName(),
+								ctx);
 				}
 			}
 		}
@@ -562,7 +623,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		return properties.get(propertyName);
 	}
 
-	private void compareArrays(final Object expected, final Object actual, final String path, final MismatchContext ctx) {
+	private void
+			compareArrays(final Object expected, final Object actual, final String path, final MismatchContext ctx) {
 		LOG.debug("Compare path [{}] as array", path);
 		try {
 			int expectedLength = Array.getLength(expected), actualLength = Array.getLength(actual);
@@ -580,7 +642,10 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		}
 	}
 
-	private void compareLangTypes(final Object expected, final Object actual, final String path, final MismatchContext ctx) {
+	private void compareLangTypes(final Object expected,
+			final Object actual,
+			final String path,
+			final MismatchContext ctx) {
 		LOG.debug("Compare path [{}] as lang type", path);
 		try {
 			if (!expected.equals(actual)) {
@@ -617,7 +682,10 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void compareCollections(final Collection expected, final Collection actual, final String path, final MismatchContext ctx) {
+	private void compareCollections(final Collection expected,
+			final Collection actual,
+			final String path,
+			final MismatchContext ctx) {
 		compareLists(new ArrayList(expected), new ArrayList(actual), path, ctx);
 	}
 
@@ -657,7 +725,10 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void compareUsingPropertyComparator(final Object lhs, final Object rhs, final String path, final PropertyComparator comparator,
+	private void compareUsingPropertyComparator(final Object lhs,
+			final Object rhs,
+			final String path,
+			final PropertyComparator comparator,
 			final MismatchContext ctx) {
 		LOG.debug("Compare path [{}] using [{}]", path, comparator.getClass().getSimpleName());
 		try {
@@ -718,10 +789,15 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 			if (!isFirstMismatch()) {
 				desc.appendText(SystemUtils.LINE_SEPARATOR);
 			}
-			desc.appendText(path).appendText(" is ").appendValue(actual).appendText(" instead of ").appendValue(expected);
+			desc
+					.appendText(path)
+						.appendText(" is ")
+						.appendValue(actual)
+						.appendText(" instead of ")
+						.appendValue(expected);
 			same = false;
 		}
-		
+
 		private boolean isFirstMismatch() {
 			return same == true;
 		}

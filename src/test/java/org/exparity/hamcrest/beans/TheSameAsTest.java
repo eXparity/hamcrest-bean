@@ -13,8 +13,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.exparity.hamcrest.BeanMatchers;
 import org.exparity.hamcrest.beans.TheSameAs.PropertyComparator;
-import org.exparity.hamcrest.beans.TheSameAs.PropertyType;
 import org.exparity.hamcrest.beans.comparators.HasPattern;
 import org.exparity.hamcrest.beans.testutils.types.ClassContainingNestedClasses;
 import org.exparity.hamcrest.beans.testutils.types.NotBean;
@@ -37,8 +37,9 @@ public class TheSameAsTest {
 		assertThat(true, theSameAs(true));
 	}
 
-	@Test(expectedExceptions = AssertionError.class, expectedExceptionsMessageRegExp="\nExpected: the same as <false>\n.*but: Boolean is <true> instead of <false>")
-	public void canCompareDifferentBooleans() {
+	@Test(expectedExceptions = AssertionError.class, expectedExceptionsMessageRegExp = "\nExpected: the same as <false>\n.*but: Boolean is <true> instead of <false>")
+	public void
+			canCompareDifferentBooleans() {
 		assertThat(true, theSameAs(false));
 	}
 
@@ -47,8 +48,9 @@ public class TheSameAsTest {
 		assertThat(1, theSameAs(1));
 	}
 
-	@Test(expectedExceptions = AssertionError.class, expectedExceptionsMessageRegExp="\nExpected: the same as <2>\n.*but: Integer is <1> instead of <2>")
-	public void canCompareDifferentIntegers() {
+	@Test(expectedExceptions = AssertionError.class, expectedExceptionsMessageRegExp = "\nExpected: the same as <2>\n.*but: Integer is <1> instead of <2>")
+	public void
+			canCompareDifferentIntegers() {
 		assertThat(1, theSameAs(2));
 	}
 
@@ -57,8 +59,9 @@ public class TheSameAsTest {
 		assertThat(1L, theSameAs(1L));
 	}
 
-	@Test(expectedExceptions = AssertionError.class, expectedExceptionsMessageRegExp="\nExpected: the same as <2L>\n.*but: Long is <1L> instead of <2L>")
-	public void canCompareDifferentLongs() {
+	@Test(expectedExceptions = AssertionError.class, expectedExceptionsMessageRegExp = "\nExpected: the same as <2L>\n.*but: Long is <1L> instead of <2L>")
+	public void
+			canCompareDifferentLongs() {
 		assertThat(1L, theSameAs(2L));
 	}
 
@@ -95,8 +98,11 @@ public class TheSameAsTest {
 	@Test
 	public void canCompareListsOfNonComparableObjects() {
 		ObjectWithAllTypes tree = new ObjectWithAllTypes(), otherTree = new ObjectWithAllTypes();
-		tree.addObject(Arrays.asList(new SimpleTypeWithList(false, Arrays.asList(new SimpleType("A"), new SimpleType("B")))));
-		otherTree.addObject(Arrays.asList(new SimpleTypeWithList(false, Arrays.asList(new SimpleType("B"), new SimpleType("A")))));
+		tree.addObject(Arrays.asList(new SimpleTypeWithList(false, Arrays.asList(new SimpleType("A"), new SimpleType(
+				"B")))));
+		otherTree.addObject(Arrays.asList(new SimpleTypeWithList(false, Arrays.asList(
+				new SimpleType("B"),
+					new SimpleType("A")))));
 		assertThat(tree, theSameAs(otherTree));
 	}
 
@@ -127,14 +133,16 @@ public class TheSameAsTest {
 
 	@Test
 	public void canCompareObjectArrays() {
-		assertThat(new SimpleType[] { new SimpleType("A"), new SimpleType("B") }, theSameAs(new SimpleType[] { new SimpleType("A"),
-				new SimpleType("B") }));
+		assertThat(
+				new SimpleType[] { new SimpleType("A"), new SimpleType("B") },
+					theSameAs(new SimpleType[] { new SimpleType("A"), new SimpleType("B") }));
 	}
 
 	@Test(expectedExceptions = AssertionError.class)
 	public void canCompareDifferentObjectArrays() {
-		assertThat(new SimpleType[] { new SimpleType("A"), new SimpleType("B") }, theSameAs(new SimpleType[] { new SimpleType("A"),
-				new SimpleType("C") }));
+		assertThat(
+				new SimpleType[] { new SimpleType("A"), new SimpleType("B") },
+					theSameAs(new SimpleType[] { new SimpleType("A"), new SimpleType("C") }));
 	}
 
 	@Test
@@ -266,6 +274,17 @@ public class TheSameAsTest {
 	}
 
 	@Test
+	public void canExcludePathNamedType() {
+		ObjectWithAllTypes reference = new ObjectWithAllTypes();
+		reference.setStringValue("Oak");
+		reference.setIntValue(1);
+		ObjectWithAllTypes sample = new ObjectWithAllTypes();
+		sample.setStringValue("Oak");
+		sample.setIntValue(2);
+		assertThat(sample, theSameAs(reference, "type").excludePath("type.IntValue"));
+	}
+
+	@Test
 	public void canExcludeProperty() {
 		ObjectWithAllTypes reference = new ObjectWithAllTypes();
 		reference.setStringValue("Oak");
@@ -283,6 +302,15 @@ public class TheSameAsTest {
 		ObjectWithAllTypes sample = new ObjectWithAllTypes();
 		sample.setStringValue("Olive");
 		assertThat(sample, theSameAs(reference).comparePath("ObjectWithAllTypes.StringValue", new HasPattern("O.*")));
+	}
+
+	@Test
+	public void canOverridePathComparatorWithNamedType() {
+		ObjectWithAllTypes reference = new ObjectWithAllTypes();
+		reference.setStringValue("Oak");
+		ObjectWithAllTypes sample = new ObjectWithAllTypes();
+		sample.setStringValue("Olive");
+		assertThat(sample, theSameAs(reference, "base").comparePath("base.StringValue", new HasPattern("O.*")));
 	}
 
 	@Test
@@ -309,13 +337,17 @@ public class TheSameAsTest {
 		reference.setObject(new SimpleTypeWithList(true, Arrays.asList(new SimpleType())));
 		ObjectWithAllTypes sample = new ObjectWithAllTypes();
 		sample.setObject(new SimpleTypeWithList(false, Arrays.asList(new SimpleType())));
-		assertThat(sample, theSameAs(reference).compareType(SimpleTypeWithList.class, new PropertyComparator<SimpleTypeWithList>() {
+		assertThat(
+				sample,
+					theSameAs(reference).compareType(
+							SimpleTypeWithList.class,
+								new PropertyComparator<SimpleTypeWithList>() {
 
-			@Override
-			public boolean matches(final SimpleTypeWithList lhs, final SimpleTypeWithList rhs) {
-				return true;
-			}
-		}));
+									@Override
+									public boolean matches(final SimpleTypeWithList lhs, final SimpleTypeWithList rhs) {
+										return true;
+									}
+								}));
 	}
 
 	@Test
@@ -325,6 +357,15 @@ public class TheSameAsTest {
 		ObjectWithAllTypes sample = new ObjectWithAllTypes();
 		sample.setStringValue("Olive");
 		assertThat(sample, theSameAs(reference).comparePath("ObjectWithAllTypes.StringValue", startsWith("O")));
+	}
+
+	@Test
+	public void canOverridePathComparatorWithMatcherWithNamedType() {
+		ObjectWithAllTypes reference = new ObjectWithAllTypes();
+		reference.setStringValue("Oak");
+		ObjectWithAllTypes sample = new ObjectWithAllTypes();
+		sample.setStringValue("Olive");
+		assertThat(sample, theSameAs(reference, "base").comparePath("base.StringValue", startsWith("O")));
 	}
 
 	@Test
@@ -419,14 +460,16 @@ public class TheSameAsTest {
 
 	@Test
 	public void canMatchListsOfTypesWithInnerClasses() {
-		ClassContainingNestedClasses reference = new ClassContainingNestedClasses(new OuterClass("A"), new OuterClass("B"));
+		ClassContainingNestedClasses reference = new ClassContainingNestedClasses(new OuterClass("A"), new OuterClass(
+				"B"));
 		ClassContainingNestedClasses actual = new ClassContainingNestedClasses(new OuterClass("A"), new OuterClass("B"));
 		assertThat(actual, theSameAs(reference));
 	}
 
 	@Test(expectedExceptions = AssertionError.class)
 	public void canMismatchListsOfTypesWithInnerClasses() {
-		ClassContainingNestedClasses reference = new ClassContainingNestedClasses(new OuterClass("A"), new OuterClass("B"));
+		ClassContainingNestedClasses reference = new ClassContainingNestedClasses(new OuterClass("A"), new OuterClass(
+				"B"));
 		ClassContainingNestedClasses actual = new ClassContainingNestedClasses(new OuterClass("C"), new OuterClass("D"));
 		assertThat(actual, theSameAs(reference));
 	}
@@ -442,7 +485,14 @@ public class TheSameAsTest {
 	public void canIgnoreNonBeanProperties() {
 		NotBean reference = new NotBean(aRandomString(10), aRandomString(10));
 		NotBean actual = new NotBean(reference.getStringA(), reference.getStringB() + aRandomString(10));
-		assertThat(actual, theSameAs(reference, PropertyType.BEAN));
+		assertThat(actual, BeanMatchers.theSameBeanAs(reference));
+	}
+
+	@Test
+	public void canIgnoreNonBeanPropertiesWithNamedType() {
+		NotBean reference = new NotBean(aRandomString(10), aRandomString(10));
+		NotBean actual = new NotBean(reference.getStringA(), reference.getStringB() + aRandomString(10));
+		assertThat(actual, BeanMatchers.theSameBeanAs(reference, "bean"));
 	}
 
 	@Test(expectedExceptions = AssertionError.class)
