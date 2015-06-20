@@ -17,13 +17,13 @@ A maven project
 
     <dependency>
         <groupId>org.exparity</groupId>
-        <artifactId>hamcrest-date</artifactId>
+        <artifactId>hamcrest-bean</artifactId>
         <version>1.0.9</version>
     </dependency>
 
 A project which uses ivy for dependency management
 
-    <dependency org="org.exparity" name="hamcrest-date" rev="1.0.9"/>
+    <dependency org="org.exparity" name="hamcrest-bean" rev="1.0.9"/>
             
 Binaries
 --------
