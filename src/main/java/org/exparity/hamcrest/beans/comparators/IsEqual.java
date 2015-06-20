@@ -8,10 +8,9 @@ import org.exparity.hamcrest.beans.TheSameAs.PropertyComparator;
  * 
  * @author Stewart Bissett
  */
-public class IsEqualsIgnoreCase implements PropertyComparator<String> {
+public class IsEqual<T> implements PropertyComparator<T> {
 
-	public boolean matches(final String lhs, final String rhs) {
-		return lhs == null ? rhs == null : lhs.equalsIgnoreCase(rhs);
+	public boolean matches(final T lhs, final T rhs) {
+		return lhs == null ? rhs == null : lhs.equals(rhs);
 	}
-
 }

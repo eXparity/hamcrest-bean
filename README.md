@@ -123,10 +123,14 @@ or after static importing
 The library includes several built in overrides for the comparison
 
 * __IsComparable__ - Test if the objects are comparable
-* __IsEquals__ - Test if the objects are equals
-* __IsEqualsIgnoreCase__ - Test if two string objects are equal regardless of case
+* __IsEqual__ - Test if the objects are equals
+* __IsEqualIgnoreCase__ - Test if two string objects are equal regardless of case
 * __HasPattern__ - Test if the strings match the pattern
-
+* __Excluded__ - Exclude a property, type, or method from the comparison
+* __IsEqualDate__ - Test it two date objects are equal date but not time or millisecond portion
+* __IsEqualDateTime__ - Test it two date objects are equal date and time but no millisecond portion
+* __IsEqualTimestamp__ - Test it two date objects are equal timestamps
+* __Matches__ - Test if a property, type, or method are equal using a hamcrest matcher
 
 The Javadocs include examples on all methods so you can look there for examples for specific methods.
 
@@ -141,6 +145,8 @@ The source includes a pom.xml for building with Maven
 
 Release Notes
 -------------
+Changes 1.0.9 -> 1.0.10
+  * Add IsEqual date comparators and add BeanComparators static factory
 Changes 1.0.8 -> 1.0.9
   * Add theSameBeanAs matchers
 Changes 1.0.4 -> 1.0.8

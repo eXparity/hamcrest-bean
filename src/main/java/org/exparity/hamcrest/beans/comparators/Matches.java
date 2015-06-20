@@ -9,11 +9,11 @@ import org.hamcrest.Matcher;
  * 
  * @author Stewart Bissett
  */
-public class HamcrestComparator<T> implements PropertyComparator<T> {
+public class Matches<T> implements PropertyComparator<T> {
 
 	private final Matcher<T> matcher;
 
-	public HamcrestComparator(final Matcher<T> matcher) {
+	public Matches(final Matcher<T> matcher) {
 		this.matcher = matcher;
 	}
 

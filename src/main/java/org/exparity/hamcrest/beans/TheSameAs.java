@@ -28,9 +28,10 @@ import org.exparity.beans.core.ImmutableTypeProperty;
 import org.exparity.beans.core.TypeProperty;
 import org.exparity.beans.core.naming.CapitalizedNamingStrategy;
 import org.exparity.hamcrest.beans.comparators.Excluded;
-import org.exparity.hamcrest.beans.comparators.HamcrestComparator;
+import org.exparity.hamcrest.beans.comparators.Matches;
 import org.exparity.hamcrest.beans.comparators.IsComparable;
-import org.exparity.hamcrest.beans.comparators.IsEquals;
+import org.exparity.hamcrest.beans.comparators.IsEqual;
+import org.exparity.hamcrest.beans.comparators.IsEqualTimestamp;
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
@@ -201,13 +202,13 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 	public TheSameAs(final T object, final String name, final PropertyType propertyTypes) {
 		this.types.put(BigDecimal.class, new IsComparable<BigDecimal>());
-		this.types.put(String.class, new IsEquals<String>());
-		this.types.put(Integer.class, new IsEquals<Integer>());
-		this.types.put(Long.class, new IsEquals<Long>());
-		this.types.put(Double.class, new IsEquals<Double>());
-		this.types.put(Float.class, new IsEquals<Float>());
-		this.types.put(Character.class, new IsEquals<Character>());
-		this.types.put(Date.class, new IsComparable<Date>());
+		this.types.put(String.class, new IsEqual<String>());
+		this.types.put(Integer.class, new IsEqual<Integer>());
+		this.types.put(Long.class, new IsEqual<Long>());
+		this.types.put(Double.class, new IsEqual<Double>());
+		this.types.put(Float.class, new IsEqual<Float>());
+		this.types.put(Character.class, new IsEqual<Character>());
+		this.types.put(Date.class, new IsEqualTimestamp());
 		this.types.put(Class.class, new Excluded<Class<?>>());
 		this.object = object;
 		this.name = name;
@@ -411,7 +412,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * @return the current matcher
 	 */
 	public <P> TheSameAs<T> comparePath(final String path, final Matcher<P> matcher) {
-		this.paths.put(path.toLowerCase(), new HamcrestComparator<P>(matcher));
+		this.paths.put(path.toLowerCase(), new Matches<P>(matcher));
 		return this;
 	}
 
@@ -442,7 +443,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * @return the current matcher
 	 */
 	public <P> TheSameAs<T> compareProperty(final String path, final Matcher<P> matcher) {
-		this.properties.put(path.toLowerCase(), new HamcrestComparator<P>(matcher));
+		this.properties.put(path.toLowerCase(), new Matches<P>(matcher));
 		return this;
 	}
 
@@ -473,7 +474,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	 * @return the current matcher
 	 */
 	public <P> TheSameAs<T> compareType(final Class<P> type, final Matcher<P> matcher) {
-		this.types.put(type, new HamcrestComparator<P>(matcher));
+		this.types.put(type, new Matches<P>(matcher));
 		return this;
 	}
 
