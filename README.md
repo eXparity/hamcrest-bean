@@ -145,6 +145,8 @@ The source includes a pom.xml for building with Maven
 
 Release Notes
 -------------
+Changes 1.0.10 -> 1.0.11
+  * Fix Issue #6 and support comparing nulls in arrays
 Changes 1.0.9 -> 1.0.10
   * Add IsEqual date comparators and add BeanComparators static factory
 Changes 1.0.8 -> 1.0.9
