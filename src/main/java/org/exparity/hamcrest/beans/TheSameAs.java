@@ -69,7 +69,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 		/**
 		 * Check all getter style properties i.e. no arguments, method return
-		 * name starts with get or is, and returns non-void. </p>
+		 * name starts with get or is, and returns non-void.
+		 * </p>
 		 * <em>This is the default option if not property type is supplied.</em>
 		 */
 		ALL_GETTERS
@@ -216,7 +217,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	/**
-	 * Exclude a property path from the comparison. For example</p>
+	 * Exclude a property path from the comparison. For example
+	 * </p>
 	 * 
 	 * <pre>
 	 * class Person [
@@ -244,7 +246,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	/**
-	 * Exclude a property from the comparison. For example</p>
+	 * Exclude a property from the comparison. For example
+	 * </p>
 	 * 
 	 * <pre>
 	 * class Person [
@@ -272,7 +275,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	/**
-	 * Exclude a type from the comparison. For example</p>
+	 * Exclude a type from the comparison. For example
+	 * </p>
 	 * 
 	 * <pre>
 	 * class Person [
@@ -300,7 +304,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	/**
-	 * Override the PropertyComparator used for a path. For example</p>
+	 * Override the PropertyComparator used for a path. For example
+	 * </p>
 	 * 
 	 * <pre>
 	 * class Person [
@@ -328,7 +333,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	/**
-	 * Override the PropertyComparator used for a property. For example</p>
+	 * Override the PropertyComparator used for a property. For example
+	 * </p>
 	 * 
 	 * <pre>
 	 * class Person [
@@ -358,7 +364,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	/**
-	 * Override the PropertyComparator used for a type. For example</p>
+	 * Override the PropertyComparator used for a type. For example
+	 * </p>
 	 * 
 	 * <pre>
 	 * class Person [
@@ -389,7 +396,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 	/**
 	 * Override the PropertyComparator used for a path to use a hamcrest
-	 * Matcher. For example</p>
+	 * Matcher. For example
+	 * </p>
 	 * 
 	 * <pre>
 	 * class Person [
@@ -418,7 +426,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 	/**
 	 * Override the PropertyComparator used for a property to use a hamcrest
-	 * matcher. For example</p>
+	 * matcher. For example
+	 * </p>
 	 * 
 	 * <pre>
 	 * class Person [
@@ -449,7 +458,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 
 	/**
 	 * Override the PropertyComparator used for a type to use a hamcrest
-	 * Matcher. For example</p>
+	 * Matcher. For example
+	 * </p>
 	 * 
 	 * <pre>
 	 * class Person [
@@ -490,8 +500,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private void
-			compareObjects(final Object expected, final Object actual, final String path, final MismatchContext ctx) {
+	private void compareObjects(final Object expected, final Object actual, final String path,
+			final MismatchContext ctx) {
 
 		LOG.trace("Compare [{}] vs [{}] at [{}]", new Object[] { expected, actual, path });
 
@@ -551,19 +561,13 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		} else {
 			if (PropertyType.ALL_GETTERS.equals(this.propertyTypes)) {
 				for (ImmutableTypeProperty property : type.accessorList()) {
-					compareObjects(
-							property.getValue(expected),
-								property.getValue(actual),
-								path + getDotIfRequired(path) + property.getName(),
-								ctx);
+					compareObjects(property.getValue(expected), property.getValue(actual),
+							path + getDotIfRequired(path) + property.getName(), ctx);
 				}
 			} else {
 				for (TypeProperty property : type.propertyList()) {
-					compareObjects(
-							property.getValue(expected),
-								property.getValue(actual),
-								path + getDotIfRequired(path) + property.getName(),
-								ctx);
+					compareObjects(property.getValue(expected), property.getValue(actual),
+							path + getDotIfRequired(path) + property.getName(), ctx);
 				}
 			}
 		}
@@ -573,8 +577,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		return properties.get(propertyName);
 	}
 
-	private void
-			compareArrays(final Object expected, final Object actual, final String path, final MismatchContext ctx) {
+	private void compareArrays(final Object expected, final Object actual, final String path,
+			final MismatchContext ctx) {
 		LOG.debug("Compare path [{}] as array", path);
 		try {
 			int expectedLength = Array.getLength(expected), actualLength = Array.getLength(actual);
@@ -582,7 +586,12 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 				ctx.addMismatch(expectedLength, actualLength, path + getDotIfRequired(path) + "size");
 			} else {
 				for (int i = 0; i < expectedLength; ++i) {
-					if (!Array.get(expected, i).equals(Array.get(actual, i))) {
+					Object expectedValue = Array.get(expected, i), actualValue = Array.get(actual, i);
+					if (expectedValue == null) {
+						if (actualValue != null) {
+							ctx.addMismatch(expected, actual, path + getDotIfRequired(path));
+						}
+					} else if (!expectedValue.equals(actualValue)) {
 						ctx.addMismatch(expected, actual, path + getDotIfRequired(path));
 					}
 				}
@@ -592,9 +601,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		}
 	}
 
-	private void compareLangTypes(final Object expected,
-			final Object actual,
-			final String path,
+	private void compareLangTypes(final Object expected, final Object actual, final String path,
 			final MismatchContext ctx) {
 		LOG.debug("Compare path [{}] as lang type", path);
 		try {
@@ -632,9 +639,7 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void compareCollections(final Collection expected,
-			final Collection actual,
-			final String path,
+	private void compareCollections(final Collection expected, final Collection actual, final String path,
 			final MismatchContext ctx) {
 		compareLists(new ArrayList(expected), new ArrayList(actual), path, ctx);
 	}
@@ -675,11 +680,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void compareUsingPropertyComparator(final Object lhs,
-			final Object rhs,
-			final String path,
-			final PropertyComparator comparator,
-			final MismatchContext ctx) {
+	private void compareUsingPropertyComparator(final Object lhs, final Object rhs, final String path,
+			final PropertyComparator comparator, final MismatchContext ctx) {
 		LOG.debug("Compare path [{}] using [{}]", path, comparator.getClass().getSimpleName());
 		try {
 			if (!comparator.matches(lhs, rhs)) {
@@ -739,12 +741,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 			if (!isFirstMismatch()) {
 				desc.appendText(SystemUtils.LINE_SEPARATOR);
 			}
-			desc
-					.appendText(path)
-						.appendText(" is ")
-						.appendValue(actual)
-						.appendText(" instead of ")
-						.appendValue(expected);
+			desc.appendText(path).appendText(" is ").appendValue(actual).appendText(" instead of ")
+					.appendValue(expected);
 			same = false;
 		}
 

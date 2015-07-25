@@ -130,6 +130,21 @@ public class TheSameAsTest {
 	public void canCompareDifferentByteArrays() {
 		assertThat(new byte[] { 0x01, 0x02 }, theSameAs(new byte[] { 0x02, 0x01 }));
 	}
+	
+	@Test(expectedExceptions = AssertionError.class)
+	public void canCompareArraysContainingNullExpected() {
+		assertThat(new String[] { "A", "B", null }, theSameAs(new String[] { "C", "D", null }));
+	}
+
+	@Test(expectedExceptions = AssertionError.class)
+	public void canCompareArraysContainingNullVsPresent() {
+		assertThat(new String[] { "A", "B", null }, theSameAs(new String[] { "C", "D", "E" }));
+	}
+
+	@Test(expectedExceptions = AssertionError.class)
+	public void canCompareArraysContainingPresentVsNull() {
+		assertThat(new String[] { "A", "B", "C" }, theSameAs(new String[] { "E", "F", null }));
+	}
 
 	@Test
 	public void canCompareObjectArrays() {
