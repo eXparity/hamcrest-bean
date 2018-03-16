@@ -16,13 +16,7 @@ import java.util.Map;
 import org.exparity.hamcrest.BeanMatchers;
 import org.exparity.hamcrest.beans.TheSameAs.PropertyComparator;
 import org.exparity.hamcrest.beans.comparators.HasPattern;
-import org.exparity.hamcrest.beans.testutils.types.ClassContainingNestedClasses;
-import org.exparity.hamcrest.beans.testutils.types.NotBean;
-import org.exparity.hamcrest.beans.testutils.types.ObjectWithAllTypes;
-import org.exparity.hamcrest.beans.testutils.types.OuterClass;
-import org.exparity.hamcrest.beans.testutils.types.SimpleType;
-import org.exparity.hamcrest.beans.testutils.types.SimpleTypeWithList;
-import org.exparity.hamcrest.beans.testutils.types.SimpleTypeWithSimpleType;
+import org.exparity.hamcrest.beans.testutils.types.*;
 import org.testng.annotations.Test;
 
 /**
@@ -514,6 +508,20 @@ public class TheSameAsTest {
 	public void canTestNestedNullObjects() {
 		SimpleTypeWithSimpleType reference = aRandomInstanceOf(SimpleTypeWithSimpleType.class);
 		SimpleTypeWithSimpleType actual = new SimpleTypeWithSimpleType();
+		assertThat(actual, theSameAs(reference));
+	}
+
+	@Test
+	public void canCompareSameEnumValues() {
+		final SimpleEnum reference = SimpleEnum.VALUE_A;
+		final SimpleEnum actual = SimpleEnum.VALUE_A;
+		assertThat(actual, theSameAs(reference));
+	}
+
+	@Test(expectedExceptions = AssertionError.class)
+	public void canCompareDifferentEnumValues() {
+		final SimpleEnum reference = SimpleEnum.VALUE_A;
+		final SimpleEnum actual = SimpleEnum.VALUE_B;
 		assertThat(actual, theSameAs(reference));
 	}
 
