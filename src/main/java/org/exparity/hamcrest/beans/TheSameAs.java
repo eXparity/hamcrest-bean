@@ -550,6 +550,8 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 		final Type type = type(klass, new CapitalizedNamingStrategy());
 		if (type.isArray()) {
 			compareArrays(expected, actual, path, ctx);
+		} else if (type.isEnum()) {
+			compareEnums(expected, actual, path, ctx);
 		} else if (type.packageName().startsWith("java.lang")) {
 			compareLangTypes(expected, actual, path, ctx);
 		} else if (type.is(List.class)) {
@@ -598,6 +600,14 @@ public class TheSameAs<T> extends TypeSafeDiagnosingMatcher<T> {
 			}
 		} catch (Exception e) {
 			throw new RuntimeException("Error comparing path '" + path + "'. Error '" + e.getMessage() + "'", e);
+		}
+	}
+
+	private void compareEnums(final Object expected, final Object actual, final String path,
+							  final MismatchContext ctx) {
+		LOG.debug("Compare path [{}] as enum", path);
+		if (actual != expected) {
+			ctx.addMismatch(expected, actual, path);
 		}
 	}
 
