@@ -18,12 +18,12 @@ A maven project
     <dependency>
         <groupId>org.exparity</groupId>
         <artifactId>hamcrest-bean</artifactId>
-        <version>1.0.11</version>
+        <version>1.0.12</version>
     </dependency>
 
 A project which uses ivy for dependency management
 
-    <dependency org="org.exparity" name="hamcrest-bean" rev="1.0.11"/>
+    <dependency org="org.exparity" name="hamcrest-bean" rev="1.0.12"/>
             
 Binaries
 --------
@@ -145,6 +145,8 @@ The source includes a pom.xml for building with Maven
 
 Release Notes
 -------------
+Changes 1.0.11 -> 1.0.12
+  * Fix Issue #7 Issues comparing enum values
 Changes 1.0.10 -> 1.0.11
   * Fix Issue #6 and support comparing nulls in arrays
 Changes 1.0.9 -> 1.0.10
